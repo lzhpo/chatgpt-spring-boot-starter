@@ -113,7 +113,7 @@ openai:
 
 ### 1.流式输出示例
 
-简单网页效果示例：
+简单网页效果示例（打字机效果）：
 ![](./does/images/stream-chat-web-sample.png)
 
 后端简单实现示例：
