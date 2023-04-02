@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat</title>
+    <link rel="stylesheet" type="text/css" th:href="@{/lib/layui/css/layui.css}" />
+    <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}" />
+</head>
+<body>
+
+<div class="chat-container">
+    <div class="chat-content">
+        <ul class="layui-timeline" id="message-list">
+        </ul>
+    </div>
+    <div class="chat-footer">
+        <button id="clear-button" class="layui-btn layui-btn-sm layui-btn-primary layui-border-red" style="float:left;">
+            <i class="layui-icon layui-icon-delete"></i>
+        </button>
+        <button id="stop-button" class="layui-btn layui-btn-sm layui-btn-primary layui-border-orange layui-btn-disabled" style="float:left;">
+            <i class="layui-icon layui-icon-pause"></i>
+        </button>
+        <button id="send-button" class="layui-btn layui-btn-sm layui-btn-primary layui-border-blue layui-btn-disabled" style="float:right;">
+            <i class="layui-icon layui-icon-release"></i>
+        </button>
+        <textarea id="message" placeholder="请输入内容" class="layui-textarea"></textarea>
+    </div>
+</div>
+
+<script th:src="@{/lib/layui/layui.js}"></script>
+<script th:src="@{/js/chat.js}"></script>
+<script>
+    let CAN_STOP_FLAG = false;
+
+    layui.use(['jquery', 'layer'], function() {
+        const $ = layui.$;
+
+        const $chatContent = $(".chat-content");
+        const $messageList = $("#message-list");
+        const $message = $("#message");
+        const $sendButton = $("#send-button");
+        const $clearButton = $("#clear-button");
+        const $stopButton = $("#stop-button");
+
+        $message.on('input', function() {
+            if ($message.val().trim() === '') {
+                $sendButton.addClass("layui-btn-disabled");
+            } else {
+                $sendButton.removeClass("layui-btn-disabled");
+            }
+        });
+
+        $stopButton.on('click', function() {
+            CAN_STOP_FLAG = !CAN_STOP_FLAG;
+            if (CAN_STOP_FLAG) {
+                $stopButton.addClass("layui-btn-disabled");
+            }
+        });
+
+        $sendButton.on('click', function() {
+            const content = $message.val().trim();
+            if (content !== '') {
+                sendMessage(content);
+            }
+        });
+
+        $clearButton.on('click', function() {
+            $messageList.empty();
+        });
+
+        function sendMessage(content) {
+            $messageList.append(`
+                <li class="layui-timeline-item">
+                  <i class="layui-icon layui-icon-circle"></i>
+                  <div class="layui-timeline-content layui-text chat-user-message">
+                    <h3 class="layui-timeline-title">
+                        <i class="layui-icon layui-icon-friends"></i>
+                    </h3>
+                    <p>${content}</p>
+                  </div>
+                </li>
+              `);
+
+            $message.val("");
+            $chatContent.scrollTop($chatContent.prop('scrollHeight'));
+
+            $messageList.append(`
+              <li class="layui-timeline-item">
+                <i class="layui-icon layui-icon-circle"></i>
+                <div class="layui-timeline-content layui-text chat-bot-message">
+                  <h3 class="layui-timeline-title">
+                    <i class="layui-icon layui-icon-log"></i>
+                  </h3>
+                  <p id="content"></p>
+                </div>
+              </li>
+            `);
+
+            const eventSource = new EventSource(`http://127.0.0.1:6060/chat/stream?content=${content}`);
+            eventSource.onopen = function(event) {
+                $stopButton.removeClass("layui-btn-disabled");
+            }
+            eventSource.onmessage = function(event) {
+                console.log(event.data);
+                if (event.data === "[DONE]") {
+                    eventSource.close();
+                    $("#content").removeAttr("id");
+                    $stopButton.addClass("layui-btn-disabled");
+                    return;
+                }
+
+                const choices = JSON.parse(event.data).choices;
+                choices.filter(choice => choice.delta.content).forEach(choice => {
+                    if (choice.delta.content.indexOf("\n") >= 0) {
+                        choice.delta.content = choice.delta.content.replace("\n", "<br>");
+                    }
+                    $("#content").append(choice.delta.content);
+                    $chatContent.scrollTop($chatContent.prop('scrollHeight'));
+                });
+            };
+
+            $stopButton.on('click', function() {
+                eventSource.close();
+            });
+        }
+    });
+</script>
+</body>
+</html>

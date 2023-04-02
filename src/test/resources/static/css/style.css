@@ -1,0 +1,28 @@
+:root {
+    --blue: #2894FF;
+    --dodge-blue: #1e90ff;
+    --azure-blue: #007fff;
+}
+
+body {
+    overflow: hidden;
+}
+
+.chat-container {
+    background-color: #FAFAFA;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.chat-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 15px;
+}
+
+.chat-footer {
+    flex-shrink: 0;
+    min-width: 0;
+    padding: 15px;
+}

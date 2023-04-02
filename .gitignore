@@ -1,0 +1,11 @@
+### Java compile ###
+target/
+
+### flatten-maven-plugin ###
+*.flattened-pom.xml
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
