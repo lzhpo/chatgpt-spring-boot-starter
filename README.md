@@ -57,7 +57,7 @@ openai:
       enabled: false
     - key: "sk-xxx3"
       weight: 3.0
-      enabled: true
+      enabled: false
 ```
 
 ### 2. 支持配置代理
