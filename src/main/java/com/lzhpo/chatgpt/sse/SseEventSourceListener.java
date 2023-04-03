@@ -18,7 +18,6 @@ package com.lzhpo.chatgpt.sse;
 
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.Response;
 import okhttp3.sse.EventSource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,24 +40,10 @@ public class SseEventSourceListener extends LoggingEventSourceListener {
     }
 
     @Override
-    public void onClosed(@NotNull EventSource eventSource) {
-        super.onClosed(eventSource);
-        eventSource.cancel();
-        sseEmitter.complete();
-    }
-
-    @Override
     @SneakyThrows
     public void onEvent(
             @NotNull EventSource eventSource, @Nullable String id, @Nullable String type, @NotNull String data) {
         super.onEvent(eventSource, id, type, data);
         sseEmitter.send(data);
-    }
-
-    @Override
-    public void onFailure(@NotNull EventSource eventSource, @Nullable Throwable e, @Nullable Response response) {
-        super.onFailure(eventSource, e, response);
-        eventSource.cancel();
-        sseEmitter.completeWithError(getOrCreateDefaultError(e));
     }
 }

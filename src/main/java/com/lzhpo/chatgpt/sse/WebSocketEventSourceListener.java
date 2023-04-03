@@ -16,40 +16,34 @@
 
 package com.lzhpo.chatgpt.sse;
 
+import javax.websocket.Session;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.Response;
 import okhttp3.sse.EventSource;
-import okhttp3.sse.EventSourceListener;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.springframework.util.Assert;
 
 /**
- * Just logging listener for <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events</a>.
+ * WebSocket with <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events</a>.
  *
  * @author lzhpo
  */
 @Slf4j
-public class LoggingEventSourceListener extends EventSourceListener {
+public class WebSocketEventSourceListener extends LoggingEventSourceListener {
 
-    @Override
-    public void onClosed(@NotNull EventSource eventSource) {
-        log.debug("Execute onClosed method.");
+    private final Session session;
+
+    public WebSocketEventSourceListener(Session session) {
+        Assert.notNull(session, "WebSocket session cannot null.");
+        this.session = session;
     }
 
     @Override
+    @SneakyThrows
     public void onEvent(
             @NotNull EventSource eventSource, @Nullable String id, @Nullable String type, @NotNull String data) {
-        log.debug("Execute onClosed method.");
-        log.debug("id: {}, type: {}, data: {}", id, type, data);
-    }
-
-    @Override
-    public void onFailure(@NotNull EventSource eventSource, @Nullable Throwable e, @Nullable Response response) {
-        log.error("Execute onClosed method, response: {}, error: ", response, e);
-    }
-
-    @Override
-    public void onOpen(@NotNull EventSource eventSource, @NotNull Response response) {
-        log.debug("Execute onClosed method, response: {}", response);
+        super.onEvent(eventSource, id, type, data);
+        session.getBasicRemote().sendText(data);
     }
 }
