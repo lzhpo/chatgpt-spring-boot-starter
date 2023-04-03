@@ -7,7 +7,7 @@ logging:
 
 openai:
   keys:
-    - key: "sk-xxx1"
+    - key: "sk-xx1"
       weight: 1.0
       enabled: true
     - key: "sk-xxx2"
@@ -15,7 +15,7 @@ openai:
       enabled: false
     - key: "sk-xxx3"
       weight: 3.0
-      enabled: true
+      enabled: false
   urls:
     moderations: "https://api.openai.com/v1/moderations"
     completions: "https://api.openai.com/v1/completions"
@@ -40,8 +40,9 @@ openai:
     create_image: "https://api.openai.com/v1/images/generations"
     create_image_edit: "https://api.openai.com/v1/images/edits"
     create_image_variation: "https://api.openai.com/v1/images/variations"
-    credit_grants: "https://api.openai.com/dashboard/billing/credit_grants"
+    billing-credit-grants: "https://api.openai.com/dashboard/billing/credit_grants"
     users: "https://api.openai.com/v1/organizations/{organizationId}/users"
+    billing-subscription: "https://api.openai.com/v1/dashboard/billing/subscription"
   proxy:
     host: "127.0.0.1"
     port: 7890

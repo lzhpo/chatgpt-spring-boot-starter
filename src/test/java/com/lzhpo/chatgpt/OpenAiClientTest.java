@@ -24,6 +24,7 @@ import cn.hutool.core.lang.Console;
 import com.lzhpo.chatgpt.entity.audio.CreateAudioRequest;
 import com.lzhpo.chatgpt.entity.audio.CreateAudioResponse;
 import com.lzhpo.chatgpt.entity.billing.CreditGrantsResponse;
+import com.lzhpo.chatgpt.entity.billing.SubscriptionResponse;
 import com.lzhpo.chatgpt.entity.chat.ChatCompletionMessage;
 import com.lzhpo.chatgpt.entity.chat.ChatCompletionRequest;
 import com.lzhpo.chatgpt.entity.chat.ChatCompletionResponse;
@@ -55,7 +56,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.web.socket.server.standard.ServerEndpointExporter;
 
 /**
  * @author lzhpo
@@ -66,6 +69,9 @@ class OpenAiClientTest {
 
     @Autowired
     private OpenAiClient openAiService;
+
+    @MockBean
+    private ServerEndpointExporter serverEndpointExporter;
 
     @Test
     @Order(1)
@@ -367,8 +373,8 @@ class OpenAiClientTest {
 
     @Test
     @Order(25)
-    void creditGrants() {
-        CreditGrantsResponse response = openAiService.creditGrants();
+    void billingCreditGrants() {
+        CreditGrantsResponse response = openAiService.billingCreditGrants();
 
         assertNotNull(response);
         Console.log(JsonUtils.toJsonPrettyString(response));
@@ -378,6 +384,15 @@ class OpenAiClientTest {
     @Order(26)
     void users() {
         UserResponse response = openAiService.users("org-xxx");
+
+        assertNotNull(response);
+        Console.log(JsonUtils.toJsonPrettyString(response));
+    }
+
+    @Test
+    @Order(27)
+    void billingSubscription() {
+        SubscriptionResponse response = openAiService.billingSubscription();
 
         assertNotNull(response);
         Console.log(JsonUtils.toJsonPrettyString(response));

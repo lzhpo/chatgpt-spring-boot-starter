@@ -26,17 +26,17 @@
 - [x] 用户余额查询（Billing credit grants）
 - [x] 用户信息查询（User）
 - [x] 图像（Image）
-  - [x] 根据提示创建图像（Create image）
-  - [x] 根据提示编辑图像（Create image edit）
-  - [x] 根据提供的图像生成多个变化版本的图像（Create image variation）
+    - [x] 根据提示创建图像（Create image）
+    - [x] 根据提示编辑图像（Create image edit）
+    - [x] 根据提供的图像生成多个变化版本的图像（Create image variation）
 
 ## 导入依赖
 
 ```xml
 <dependency>
-  <groupId>com.lzhpo</groupId>
-  <artifactId>chatgpt-spring-boot-starter</artifactId>
-  <version>${version}</version>
+    <groupId>com.lzhpo</groupId>
+    <artifactId>chatgpt-spring-boot-starter</artifactId>
+    <version>${version}</version>
 </dependency>
 ```
 
@@ -106,8 +106,9 @@ openai:
     create_image: "https://api.openai.com/v1/images/generations"
     create_image_edit: "https://api.openai.com/v1/images/edits"
     create_image_variation: "https://api.openai.com/v1/images/variations"
-    credit_grants: "https://api.openai.com/dashboard/billing/credit_grants"
+    billing-credit-grants: "https://api.openai.com/dashboard/billing/credit_grants"
     users: "https://api.openai.com/v1/organizations/{organizationId}/users"
+    billing-subscription: "https://api.openai.com/v1/dashboard/billing/subscription"
 ```
 
 ## 代码示例
@@ -198,8 +199,8 @@ public class OpenAiWebSocketTest {
 ```java
 @Bean
 public ServerEndpointExporter serverEndpointExporter() {
-    return new ServerEndpointExporter();
-}
+        return new ServerEndpointExporter();
+        }
 ```
 
 前端代码主要逻辑如下：
@@ -550,8 +551,8 @@ class OpenAiClientTest {
 
     @Test
     @Order(25)
-    void creditGrants() {
-        CreditGrantsResponse response = openAiService.creditGrants();
+    void billingCreditGrants() {
+        CreditGrantsResponse response = openAiService.billingCreditGrants();
 
         assertNotNull(response);
         Console.log(JsonUtils.toJsonPrettyString(response));
@@ -561,6 +562,15 @@ class OpenAiClientTest {
     @Order(26)
     void users() {
         UserResponse response = openAiService.users("org-xxx");
+
+        assertNotNull(response);
+        Console.log(JsonUtils.toJsonPrettyString(response));
+    }
+
+    @Test
+    @Order(27)
+    void billingSubscription() {
+        SubscriptionResponse response = openAiService.billingSubscription();
 
         assertNotNull(response);
         Console.log(JsonUtils.toJsonPrettyString(response));

@@ -19,6 +19,7 @@ package com.lzhpo.chatgpt;
 import com.lzhpo.chatgpt.entity.audio.CreateAudioRequest;
 import com.lzhpo.chatgpt.entity.audio.CreateAudioResponse;
 import com.lzhpo.chatgpt.entity.billing.CreditGrantsResponse;
+import com.lzhpo.chatgpt.entity.billing.SubscriptionResponse;
 import com.lzhpo.chatgpt.entity.chat.ChatCompletionRequest;
 import com.lzhpo.chatgpt.entity.chat.ChatCompletionResponse;
 import com.lzhpo.chatgpt.entity.completions.CompletionRequest;
@@ -248,11 +249,11 @@ public interface OpenAiClient {
     CreateImageResponse createImageVariation(@NotNull Resource image, @Valid CreateImageVariationRequest request);
 
     /**
-     * Query credit grants from openAi.
+     * Query billing credit grants.
      *
      * @return {@link CreditGrantsResponse}
      */
-    CreditGrantsResponse creditGrants();
+    CreditGrantsResponse billingCreditGrants();
 
     /**
      * Get users.
@@ -261,4 +262,11 @@ public interface OpenAiClient {
      * @return {@link UserResponse}
      */
     UserResponse users(@NotBlank String organizationId);
+
+    /**
+     * Query billing subscription.
+     *
+     * @return {@link SubscriptionResponse}
+     */
+    SubscriptionResponse billingSubscription();
 }

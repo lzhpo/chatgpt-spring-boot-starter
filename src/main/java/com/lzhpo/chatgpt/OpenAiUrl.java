@@ -16,8 +16,6 @@
 
 package com.lzhpo.chatgpt;
 
-import static org.springframework.http.HttpMethod.*;
-
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -144,14 +142,19 @@ public enum OpenAiUrl {
     CREATE_IMAGE_VARIATION("POST", "https://api.openai.com/v1/images/variations"),
 
     /**
-     * Query credit grants from openAi API.
+     * Query billing credit grants API.
      */
-    CREDIT_GRANTS("GET", "https://api.openai.com/dashboard/billing/credit_grants"),
+    BILLING_CREDIT_GRANTS("GET", "https://api.openai.com/dashboard/billing/credit_grants"),
 
     /**
      * Query credit grants from openAi API.
      */
-    USERS("GET", "https://api.openai.com/v1/organizations/{organizationId}/users");
+    USERS("GET", "https://api.openai.com/v1/organizations/{organizationId}/users"),
+
+    /**
+     * Query billing subscription API.
+     */
+    BILLING_SUBSCRIPTION("GET", "https://api.openai.com/v1/dashboard/billing/subscription");
 
     /**
      * Request http method.

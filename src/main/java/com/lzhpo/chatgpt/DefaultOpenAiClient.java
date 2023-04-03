@@ -26,6 +26,7 @@ import cn.hutool.http.Header;
 import com.lzhpo.chatgpt.entity.audio.CreateAudioRequest;
 import com.lzhpo.chatgpt.entity.audio.CreateAudioResponse;
 import com.lzhpo.chatgpt.entity.billing.CreditGrantsResponse;
+import com.lzhpo.chatgpt.entity.billing.SubscriptionResponse;
 import com.lzhpo.chatgpt.entity.chat.ChatCompletionRequest;
 import com.lzhpo.chatgpt.entity.chat.ChatCompletionResponse;
 import com.lzhpo.chatgpt.entity.completions.CompletionRequest;
@@ -240,13 +241,18 @@ public class DefaultOpenAiClient implements OpenAiClient {
     }
 
     @Override
-    public CreditGrantsResponse creditGrants() {
-        return execute(CREDIT_GRANTS, null, CreditGrantsResponse.class);
+    public CreditGrantsResponse billingCreditGrants() {
+        return execute(BILLING_CREDIT_GRANTS, null, CreditGrantsResponse.class);
     }
 
     @Override
     public UserResponse users(String organizationId) {
         return execute(USERS, null, UserResponse.class, organizationId);
+    }
+
+    @Override
+    public SubscriptionResponse billingSubscription() {
+        return execute(BILLING_SUBSCRIPTION, null, SubscriptionResponse.class);
     }
 
     @SneakyThrows
