@@ -16,10 +16,10 @@
 
 package com.lzhpo.chatgpt.entity.chat;
 
+import cn.hutool.core.collection.ListUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.lzhpo.chatgpt.entity.CommonConfig;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import javax.validation.Valid;
@@ -124,8 +124,9 @@ public class ChatCompletionRequest extends CommonConfig {
      *
      * @param content content
      */
-    public ChatCompletionRequest(String content) {
-        this.messages = new ArrayList<>();
-        this.messages.add(ChatCompletionMessage.builder().content(content).build());
+    public static ChatCompletionRequest create(String content) {
+        ChatCompletionMessage message = new ChatCompletionMessage();
+        message.setContent(content);
+        return ChatCompletionRequest.builder().messages(ListUtil.of(message)).build();
     }
 }

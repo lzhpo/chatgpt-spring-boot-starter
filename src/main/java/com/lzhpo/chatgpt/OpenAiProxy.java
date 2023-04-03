@@ -52,6 +52,11 @@ public class OpenAiProxy {
     private String password;
 
     /**
+     * The header name to provide to proxy server.
+     */
+    private String headerName = "Proxy-Authorization";
+
+    /**
      * The connect timeout.
      */
     private Duration connectTimeout = Duration.ofMinutes(1);

@@ -2,6 +2,9 @@ package com.lzhpo.chatgpt;
 
 import cn.hutool.core.lang.WeightRandom;
 import cn.hutool.core.util.StrUtil;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -25,13 +28,14 @@ public class OpenAiAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public OkHttpClient okHttpClient() {
+    public OkHttpClient okHttpClient(List<Interceptor> interceptors) {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
+        PropertyMapper mapper = PropertyMapper.get().alwaysApplyingWhenNonNull();
+        mapper.from(interceptors).to(x -> builder.interceptors().addAll(x));
         return Optional.ofNullable(openAiProperties.getProxy())
                 .map(proxy -> {
                     String username = proxy.getUsername();
                     String password = proxy.getPassword();
-                    PropertyMapper mapper = PropertyMapper.get().alwaysApplyingWhenNonNull();
                     mapper.from(proxy::getReadTimeout).to(builder::readTimeout);
                     mapper.from(proxy::getWriteTimeout).to(builder::writeTimeout);
                     mapper.from(proxy::getConnectTimeout).to(builder::connectTimeout);
@@ -39,8 +43,9 @@ public class OpenAiAutoConfiguration {
                             .whenTrue()
                             .toCall(() -> builder.proxyAuthenticator((route, response) -> response.request()
                                     .newBuilder()
-                                    .header(OpenAiConstant.PROXY_AUTHORIZATION, Credentials.basic(username, password))
+                                    .header(proxy.getHeaderName(), Credentials.basic(username, password))
                                     .build()));
+                    builder.proxy(new Proxy(proxy.getType(), new InetSocketAddress(proxy.getHost(), proxy.getPort())));
                     return builder.build();
                 })
                 .orElseGet(builder::build);

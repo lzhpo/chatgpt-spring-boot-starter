@@ -46,9 +46,14 @@ public class OpenAiTestController {
         return view;
     }
 
-    @GetMapping("/page/chat/stream")
-    public ModelAndView streamChatView() {
-        return new ModelAndView("stream-chat");
+    @GetMapping("/page/chat/sse")
+    public ModelAndView sseChatView() {
+        return new ModelAndView("sse-stream-chat");
+    }
+
+    @GetMapping("/page/chat/websocket")
+    public ModelAndView websocketChatView() {
+        return new ModelAndView("websocket-stream-chat");
     }
 
     @ResponseBody
@@ -58,10 +63,10 @@ public class OpenAiTestController {
     }
 
     @ResponseBody
-    @GetMapping("/chat/stream")
-    public SseEmitter streamChatCompletions(@RequestParam String content) {
+    @GetMapping("/chat/sse")
+    public SseEmitter sseStreamChat(@RequestParam String content) {
         SseEmitter sseEmitter = new SseEmitter();
-        ChatCompletionRequest request = new ChatCompletionRequest(content);
+        ChatCompletionRequest request = ChatCompletionRequest.create(content);
         openAiClient.streamChatCompletions(request, new SseEventSourceListener(sseEmitter));
         return sseEmitter;
     }

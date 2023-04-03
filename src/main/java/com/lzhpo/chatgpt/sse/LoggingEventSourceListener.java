@@ -16,6 +16,7 @@
 
 package com.lzhpo.chatgpt.sse;
 
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Response;
 import okhttp3.sse.EventSource;
@@ -39,17 +40,18 @@ public class LoggingEventSourceListener extends EventSourceListener {
     @Override
     public void onEvent(
             @NotNull EventSource eventSource, @Nullable String id, @Nullable String type, @NotNull String data) {
-        log.debug("Execute onClosed method.");
+        log.debug("Execute onEvent method.");
         log.debug("id: {}, type: {}, data: {}", id, type, data);
     }
 
     @Override
     public void onFailure(@NotNull EventSource eventSource, @Nullable Throwable e, @Nullable Response response) {
-        log.error("Execute onClosed method, response: {}, error: ", response, e);
+        String errorMsg = Optional.ofNullable(e).map(Throwable::getMessage).orElse("");
+        log.error("Execute onFailure method, response: {}, error: {}", response, errorMsg);
     }
 
     @Override
     public void onOpen(@NotNull EventSource eventSource, @NotNull Response response) {
-        log.debug("Execute onClosed method, response: {}", response);
+        log.debug("Execute onOpen method, response: {}", response);
     }
 }

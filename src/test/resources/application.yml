@@ -46,6 +46,7 @@ openai:
     host: "127.0.0.1"
     port: 7890
     type: http
+    header-name: "Proxy-Authorization"
     connect-timeout: 1m
     read-timeout: 1m
     write-timeout: 1m

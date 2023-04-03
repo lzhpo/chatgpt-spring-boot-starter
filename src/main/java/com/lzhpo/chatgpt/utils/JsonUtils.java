@@ -31,21 +31,21 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class JsonUtils {
 
-    private static ObjectMapper MAPPER = new ObjectMapper();
+    private static ObjectMapper mapper = new ObjectMapper();
 
     static {
-        MAPPER.registerModule(new JavaTimeModule());
-        MAPPER.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        MAPPER.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+        mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     }
 
     /**
-     * Replace the default {@link JsonUtils#MAPPER}.
+     * Replace the default {@link JsonUtils#mapper}.
      *
      * @param mapper {@link ObjectMapper}
      */
     public static void setMapper(ObjectMapper mapper) {
-        JsonUtils.MAPPER = mapper;
+        JsonUtils.mapper = mapper;
     }
 
     /**
@@ -56,7 +56,7 @@ public class JsonUtils {
      */
     @SneakyThrows
     public static <T> String toJsonPrettyString(T obj) {
-        return MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
+        return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(obj);
     }
 
     /**
@@ -67,7 +67,7 @@ public class JsonUtils {
      */
     @SneakyThrows
     public static JsonNode toJsonNode(String json) {
-        return MAPPER.readTree(json);
+        return mapper.readTree(json);
     }
 
     /**
@@ -78,7 +78,7 @@ public class JsonUtils {
      */
     @SneakyThrows
     public static String toJsonString(Object object) {
-        return MAPPER.writeValueAsString(object);
+        return mapper.writeValueAsString(object);
     }
 
     /**
@@ -91,7 +91,7 @@ public class JsonUtils {
      */
     @SneakyThrows
     public static <T> T parse(JsonNode jsonNode, Class<T> valueType) {
-        return MAPPER.treeToValue(jsonNode, valueType);
+        return mapper.treeToValue(jsonNode, valueType);
     }
 
     /**
@@ -104,7 +104,7 @@ public class JsonUtils {
      */
     @SneakyThrows
     public static <T> T parse(String content, Class<T> valueType) {
-        return MAPPER.readValue(content, valueType);
+        return mapper.readValue(content, valueType);
     }
 
     /**
@@ -117,6 +117,6 @@ public class JsonUtils {
      */
     @SneakyThrows
     public static <T> List<T> parseArray(String content, Class<T> valueType) {
-        return MAPPER.readValue(content, MAPPER.getTypeFactory().constructCollectionType(List.class, valueType));
+        return mapper.readValue(content, mapper.getTypeFactory().constructCollectionType(List.class, valueType));
     }
 }

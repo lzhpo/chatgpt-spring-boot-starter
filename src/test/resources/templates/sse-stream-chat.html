@@ -2,7 +2,7 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Chat</title>
+    <title>SSE Stream Chat</title>
     <link rel="stylesheet" type="text/css" th:href="@{/lib/layui/css/layui.css}" />
     <link rel="stylesheet" type="text/css" th:href="@{/css/style.css}" />
 </head>
@@ -96,7 +96,7 @@
               </li>
             `);
 
-            const eventSource = new EventSource(`http://127.0.0.1:6060/chat/stream?content=${content}`);
+            const eventSource = new EventSource(`http://127.0.0.1:6060/chat/sse?content=${content}`);
             eventSource.onopen = function(event) {
                 $stopButton.removeClass("layui-btn-disabled");
             }

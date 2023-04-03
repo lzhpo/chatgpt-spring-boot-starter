@@ -42,11 +42,6 @@ public final class OpenAiConstant {
     public static final String BEARER = "Bearer ";
 
     /**
-     * The Proxy-Authorization for proxy.
-     */
-    public static final String PROXY_AUTHORIZATION = "Proxy-Authorization";
-
-    /**
      * The image/png.
      */
     public static final MediaType IMAGE_PNG = MediaType.get("image/png");

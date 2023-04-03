@@ -45,7 +45,7 @@ public class OpenAiProperties {
     private OpenAiProxy proxy;
 
     /**
-     * Whether enable inner openAI endpoint.
+     * Whether logging the request and response.
      */
-    private Boolean endpoint = false;
+    private Boolean logging = true;
 }

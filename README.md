@@ -68,6 +68,7 @@ openai:
     host: "127.0.0.1"
     port: 7890
     type: http
+    header-name: "Proxy-Authorization"
     connect-timeout: 1m
     read-timeout: 1m
     write-timeout: 1m
@@ -111,12 +112,19 @@ openai:
 
 ## 代码示例
 
-### 1.流式输出示例
+### 1.流式输出（“打字机”）
 
-简单网页效果示例（打字机效果）：
-![](./does/images/stream-chat-web-sample.png)
+#### 1.SSE方式示例
 
-后端简单实现示例：
+**这里快速了解一下SSE（Server-Sent Events）**
+
+SSE和WebSocket都是用于实现服务器和浏览器之间实时通信的技术。
+WebSocket是全双工通信协议，适用于双向通信的实时场景，而SSE是单向通信协议，适用于服务器向客户端推送消息的实时场景。
+
+简单网页效果示例（“打字机”效果）：
+![](./does/images/SSE-Stream-Chat.png)
+
+后端代码简单示例：
 ```java
 @RestController
 @RequestMapping("/")
@@ -125,24 +133,112 @@ public class ChatController {
 
     private final OpenAiClient openAiClient;
 
-    @GetMapping("/chat/stream/completions")
-    public SseEmitter streamChatCompletions(@RequestParam String content) {
+    @GetMapping("/chat/sse")
+    public SseEmitter sseStreamChat(@RequestParam String content) {
         SseEmitter sseEmitter = new SseEmitter();
-        ChatCompletionRequest request = new ChatCompletionRequest(content);
+        ChatCompletionRequest request = ChatCompletionRequest.create(message);
         openAiClient.streamChatCompletions(request, new SseEventSourceListener(sseEmitter));
         return sseEmitter;
     }
 }
 ```
-
 `SseEventSourceListener`是基于`okhttp3.sse.EventSourceListener`实现的，可以接收`text/event-stream`类型的流式数据。
 
-前端以及后端实现代码简单示例：
+前端代码简单示例：
+```javascript
+// content为需要发送的消息
+const eventSource = new EventSource(`http://127.0.0.1:6060/chat/sse?content=${content}`);
+// 收到消息处理
+eventSource.onmessage = function(event) {
+    // 略...
+}
+```
+
+详细代码见仓库目录下：
 - `templates/chat.html`
-- `templates/stream-chat.html`
+- `templates/sse-stream-chat.html`
 - `com.lzhpo.chatgpt.OpenAiTestController`
 
-### 2.全部API测试示例
+#### 2.WebSocket方式示例
+
+效果和SSE方式一样，即“打字机”效果。
+
+声明WebSocket端点：
+```java
+@Slf4j
+@Component
+@ServerEndpoint("/chat/websocket")
+public class OpenAiWebSocketTest {
+
+    @OnOpen
+    public void onOpen(Session session) {
+        log.info("sessionId={} joined.", session.getId());
+    }
+
+    @OnMessage
+    public void onMessage(Session session, String message) {
+        log.info("Received sessionId={} message={}", session.getId(), message);
+        ChatCompletionRequest request = ChatCompletionRequest.create(message);
+        WebSocketEventSourceListener listener = new WebSocketEventSourceListener(session);
+        SpringUtil.getBean(OpenAiClient.class).streamChatCompletions(request, listener);
+    }
+
+    @OnClose
+    public void onClose(Session session) {
+        log.info("Closed sessionId={} connection.", session.getId());
+    }
+
+    @OnError
+    public void onError(Session session, Throwable e) {
+        log.error("sessionId={} error: {}", session.getId(), e.getMessage(), e);
+    }
+}
+```
+开启WebSocket端点：
+```java
+@Bean
+public ServerEndpointExporter serverEndpointExporter() {
+    return new ServerEndpointExporter();
+}
+```
+
+前端代码主要逻辑如下：
+```javascript
+const websocket = new WebSocket("ws://127.0.0.1:6060/chat/websocket");
+// 发送消息（content为需要发送的消息）
+websocket.send(content);
+// 收到消息
+websocket.onmessage = function(event) {
+    // 略...
+}
+```
+详细代码见仓库目录下的`templates/websocket-stream-chat.html`
+
+### 2.自定义请求拦截器
+
+实现`okhttp3.Interceptor`接口，并将其声明为bean即可。
+
+例如：
+```java
+@Slf4j
+public class OpenAiLoggingInterceptor implements Interceptor {
+
+    @NotNull
+    @Override
+    public Response intercept(@NotNull Chain chain) throws IOException {
+        Request request = chain.request();
+        log.info("Request url: {} {}", request.method(), request.url());
+        log.info("Request header: {}", request.headers());
+
+        Response response = chain.proceed(request);
+        log.info("Response code: {}", response.code());
+        log.info("Response body: {}", response.body().string());
+        return response;
+    }
+}
+```
+
+### 3.全部API测试示例
 
 见：`com.lzhpo.chatgpt.OpenAiClientTest`
 
