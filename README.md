@@ -42,7 +42,7 @@
 
 ## 配置示例
 
-### 1.支持配置多个 API Key（权重、是否启用）
+### 1. 支持配置多个 API Key（权重、是否启用）
 
 > 可以对当前 api key 设置权重，以及是否需要启用此 api key
 
@@ -60,7 +60,7 @@ openai:
       enabled: true
 ```
 
-### 2.支持配置代理
+### 2. 支持配置代理
 
 ```yaml
 openai:
@@ -76,7 +76,7 @@ openai:
     password: 123456
 ```
 
-### 3.支持自定义请求API
+### 3. 支持自定义请求API
 
 以下是当前支持的所有OpenAi的接口的默认配置，如果对OpenAi的接口做了中转就可以在此处自定义配置。
 
@@ -112,9 +112,9 @@ openai:
 
 ## 代码示例
 
-### 1.流式输出（“打字机”）
+### 1. 流式输出（“打字机”）
 
-#### 1.SSE方式示例
+#### 1.1 SSE方式示例
 
 **这里快速了解一下SSE（Server-Sent Events）**
 
@@ -159,7 +159,7 @@ eventSource.onmessage = function(event) {
 - `templates/sse-stream-chat.html`
 - `com.lzhpo.chatgpt.OpenAiTestController`
 
-#### 2.WebSocket方式示例
+#### 1.2 WebSocket方式示例
 
 效果和SSE方式一样，即“打字机”效果。
 
@@ -214,7 +214,7 @@ websocket.onmessage = function(event) {
 ```
 详细代码见仓库目录下的`templates/websocket-stream-chat.html`
 
-### 2.自定义请求拦截器
+### 2. 自定义请求拦截器
 
 实现`okhttp3.Interceptor`接口，并将其声明为bean即可。
 
@@ -238,7 +238,7 @@ public class OpenAiLoggingInterceptor implements Interceptor {
 }
 ```
 
-### 3.全部API测试示例
+### 3. 全部API测试示例
 
 见：`com.lzhpo.chatgpt.OpenAiClientTest`
 
