@@ -14,21 +14,18 @@
 
 ## 支持的功能
 
-- [x] 模型查询（Model）
-- [x] 流式/非流式对话聊天（Completion / Chat completion）
-- [x] 根据提示生成文本（Edit）
-- [x] 自然语言转换为向量表示
-- [x] 音频/视频语音转文本（Create transcription）
-- [x] 文本翻译（Create translation）
-- [x] 文件的查询、上传、删除（File - List/Upload/Delete/Retrieve）
-- [x] 预训练模型的训练、查询、放弃、事件（Fine-tunes - Create/List/Retrieve/Cancel/Events）
-- [x] 内容审核（Moderation）
-- [x] 用户余额以及使用量查询（Billing）
-- [x] 用户信息查询（User）
-- [x] 图像（Image）
-    - [x] 根据提示创建图像（Create image）
-    - [x] 根据提示编辑图像（Create image edit）
-    - [x] 根据提供的图像生成多个变化版本的图像（Create image variation）
+✅ 模型查询（Model）<br>
+✅ 流式、非流式对话聊天（Stream Chat/completion）<br>
+✅ 根据提示生成文本（Edit）<br>
+✅ 自然语言转换为向量表示<br>
+✅ 音频、视频语音转文本（Create transcription）<br>
+✅ 文本翻译（Create translation）<br>
+✅ 文件的查询、上传、删除（File - List/Upload/Delete/Retrieve）<br>
+✅ 预训练模型的微调、查询、放弃、过程(事件)（Fine-tunes - Create/List/Retrieve/Cancel/Events）<br>
+✅ 内容审核（Moderation）<br>
+✅ 用户余额、使用量查询（Billing/Usage）<br>
+✅ 用户信息查询（User）<br>
+✅ 根据提示创建、编辑图像、根据图像生成多版本图像（Image - Create/Create edit/Create variation）
 
 ## 导入依赖
 
@@ -82,7 +79,7 @@ openai:
 
 #### 3.1 方式1 - 只配置了代理
 
-如果只是配置了国内中转代理，那么只需要配置`openai.domain`为代理地址即可。
+如果只是配置了国内中转代理，那么只需要配置`openai.domain`为代理地址即可，默认值为https://api.openai.com
 
 ```yaml
 openai:
@@ -213,8 +210,8 @@ public class OpenAiWebSocketTest {
 ```java
 @Bean
 public ServerEndpointExporter serverEndpointExporter() {
-        return new ServerEndpointExporter();
-        }
+    return new ServerEndpointExporter();
+}
 ```
 
 前端代码主要逻辑如下：
