@@ -7,7 +7,7 @@ logging:
 
 openai:
   keys:
-    - key: "sk-xx1"
+    - key: "sk-xxx1"
       weight: 1.0
       enabled: true
     - key: "sk-xxx2"
@@ -49,9 +49,9 @@ openai:
     host: "127.0.0.1"
     port: 7890
     type: http
-    header-name: "Proxy-Authorization"
-    connect-timeout: 1m
-    read-timeout: 1m
-    write-timeout: 1m
+#    header-name: "Proxy-Authorization"
+#    connect-timeout: 1m
+#    read-timeout: 1m
+#    write-timeout: 1m
 #    username: admin
 #    password: 123456
