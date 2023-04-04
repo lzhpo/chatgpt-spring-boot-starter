@@ -64,6 +64,7 @@ import org.springframework.boot.context.properties.PropertyMapper;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.util.UriTemplateHandler;
 
@@ -289,13 +290,16 @@ public class DefaultOpenAiClient implements OpenAiClient {
     }
 
     private Request createRequest(OpenAiUrl openAiUrl, RequestBody requestBody, Object... uriVariables) {
-        Map<OpenAiUrl, String> openAiPropertiesUrls = openAiProperties.getUrls();
-        String apiUrl = openAiPropertiesUrls.getOrDefault(openAiUrl, openAiUrl.getDefaultUrl());
-        URI expanded = uriTemplateHandler.expand(apiUrl, uriVariables);
+        Map<OpenAiUrl, String> configUrls = openAiProperties.getUrls();
+        String requestUrl = configUrls.get(openAiUrl);
+        if (!StringUtils.hasText(requestUrl)) {
+            requestUrl = openAiProperties.getDomain() + openAiUrl.getSuffix();
+        }
+        URI requestURI = uriTemplateHandler.expand(requestUrl, uriVariables);
         return new Request.Builder()
-                .url(Objects.requireNonNull(HttpUrl.get(expanded)))
+                .url(Objects.requireNonNull(HttpUrl.get(requestURI)))
                 .header(Header.AUTHORIZATION.name(), BEARER.concat(apiKeyWeightRandom.next()))
-                .method(openAiUrl.getHttpMethod(), requestBody)
+                .method(openAiUrl.getMethod(), requestBody)
                 .build();
     }
 

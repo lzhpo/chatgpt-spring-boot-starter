@@ -45,7 +45,7 @@ public class OpenAiProperties {
     private OpenAiProxy proxy;
 
     /**
-     * Whether logging the request and response.
+     * The openAi or proxy address.
      */
-    private Boolean logging = true;
+    private String domain = "https://api.openai.com";
 }
