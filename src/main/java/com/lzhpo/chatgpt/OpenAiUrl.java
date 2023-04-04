@@ -159,8 +159,7 @@ public enum OpenAiUrl {
     /**
      * Query billing usage API.
      */
-    BILLING_USAGE(
-            "GET", "https://api.openai.com/v1/dashboard/billing/usage?start_date={start_date}&end_date={end_date}");
+    BILLING_USAGE("GET", "https://api.openai.com/v1/dashboard/billing/usage?start_date={start_date}&end_date={end_date}");
 
     /**
      * Request http method.
