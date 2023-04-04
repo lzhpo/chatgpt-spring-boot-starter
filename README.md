@@ -213,8 +213,8 @@ public class OpenAiWebSocketTest {
 ```java
 @Bean
 public ServerEndpointExporter serverEndpointExporter() {
-        return new ServerEndpointExporter();
-        }
+    return new ServerEndpointExporter();
+}
 ```
 
 前端代码主要逻辑如下：
