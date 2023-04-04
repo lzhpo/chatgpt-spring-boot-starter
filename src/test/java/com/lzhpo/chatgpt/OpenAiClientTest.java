@@ -20,11 +20,14 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import cn.hutool.core.collection.ListUtil;
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Console;
 import com.lzhpo.chatgpt.entity.audio.CreateAudioRequest;
 import com.lzhpo.chatgpt.entity.audio.CreateAudioResponse;
 import com.lzhpo.chatgpt.entity.billing.CreditGrantsResponse;
 import com.lzhpo.chatgpt.entity.billing.SubscriptionResponse;
+import com.lzhpo.chatgpt.entity.billing.UsageResponse;
 import com.lzhpo.chatgpt.entity.chat.ChatCompletionMessage;
 import com.lzhpo.chatgpt.entity.chat.ChatCompletionRequest;
 import com.lzhpo.chatgpt.entity.chat.ChatCompletionResponse;
@@ -48,6 +51,7 @@ import com.lzhpo.chatgpt.entity.users.UserResponse;
 import com.lzhpo.chatgpt.sse.CountDownLatchEventSourceListener;
 import com.lzhpo.chatgpt.utils.JsonUtils;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import org.junit.jupiter.api.MethodOrderer;
@@ -393,6 +397,18 @@ class OpenAiClientTest {
     @Order(27)
     void billingSubscription() {
         SubscriptionResponse response = openAiService.billingSubscription();
+
+        assertNotNull(response);
+        Console.log(JsonUtils.toJsonPrettyString(response));
+    }
+
+    @Test
+    @Order(28)
+    void billingUsage() {
+        Date nowDate = new Date();
+        String startDate = DateUtil.format(DateUtil.offsetDay(nowDate, -100), DatePattern.NORM_DATE_PATTERN);
+        String endDate = DateUtil.format(nowDate, DatePattern.NORM_DATE_PATTERN);
+        UsageResponse response = openAiService.billingUsage(startDate, endDate);
 
         assertNotNull(response);
         Console.log(JsonUtils.toJsonPrettyString(response));

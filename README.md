@@ -23,7 +23,7 @@
 - [x] 文件的查询、上传、删除（File - List/Upload/Delete/Retrieve）
 - [x] 预训练模型的训练、查询、放弃、事件（Fine-tunes - Create/List/Retrieve/Cancel/Events）
 - [x] 内容审核（Moderation）
-- [x] 用户余额查询（Billing credit grants）
+- [x] 用户余额以及使用量查询（Billing）
 - [x] 用户信息查询（User）
 - [x] 图像（Image）
     - [x] 根据提示创建图像（Create image）
@@ -109,6 +109,7 @@ openai:
     billing-credit-grants: "https://api.openai.com/dashboard/billing/credit_grants"
     users: "https://api.openai.com/v1/organizations/{organizationId}/users"
     billing-subscription: "https://api.openai.com/v1/dashboard/billing/subscription"
+    billing-usage: "https://api.openai.com/v1/dashboard/billing/usage?start_date={start_date}&end_date={end_date}"
 ```
 
 ## 代码示例
@@ -571,6 +572,18 @@ class OpenAiClientTest {
     @Order(27)
     void billingSubscription() {
         SubscriptionResponse response = openAiService.billingSubscription();
+
+        assertNotNull(response);
+        Console.log(JsonUtils.toJsonPrettyString(response));
+    }
+
+    @Test
+    @Order(28)
+    void billingUsage() {
+        Date nowDate = new Date();
+        String startDate = DateUtil.format(DateUtil.offsetDay(nowDate, -100), DatePattern.NORM_DATE_PATTERN);
+        String endDate = DateUtil.format(nowDate, DatePattern.NORM_DATE_PATTERN);
+        UsageResponse response = openAiService.billingUsage(startDate, endDate);
 
         assertNotNull(response);
         Console.log(JsonUtils.toJsonPrettyString(response));

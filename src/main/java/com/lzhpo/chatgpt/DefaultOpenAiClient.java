@@ -27,6 +27,7 @@ import com.lzhpo.chatgpt.entity.audio.CreateAudioRequest;
 import com.lzhpo.chatgpt.entity.audio.CreateAudioResponse;
 import com.lzhpo.chatgpt.entity.billing.CreditGrantsResponse;
 import com.lzhpo.chatgpt.entity.billing.SubscriptionResponse;
+import com.lzhpo.chatgpt.entity.billing.UsageResponse;
 import com.lzhpo.chatgpt.entity.chat.ChatCompletionRequest;
 import com.lzhpo.chatgpt.entity.chat.ChatCompletionResponse;
 import com.lzhpo.chatgpt.entity.completions.CompletionRequest;
@@ -253,6 +254,11 @@ public class DefaultOpenAiClient implements OpenAiClient {
     @Override
     public SubscriptionResponse billingSubscription() {
         return execute(BILLING_SUBSCRIPTION, null, SubscriptionResponse.class);
+    }
+
+    @Override
+    public UsageResponse billingUsage(String startDate, String endDate) {
+        return execute(BILLING_USAGE, null, UsageResponse.class, startDate, endDate);
     }
 
     @SneakyThrows

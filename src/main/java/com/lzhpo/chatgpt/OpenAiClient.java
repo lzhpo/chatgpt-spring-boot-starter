@@ -20,6 +20,7 @@ import com.lzhpo.chatgpt.entity.audio.CreateAudioRequest;
 import com.lzhpo.chatgpt.entity.audio.CreateAudioResponse;
 import com.lzhpo.chatgpt.entity.billing.CreditGrantsResponse;
 import com.lzhpo.chatgpt.entity.billing.SubscriptionResponse;
+import com.lzhpo.chatgpt.entity.billing.UsageResponse;
 import com.lzhpo.chatgpt.entity.chat.ChatCompletionRequest;
 import com.lzhpo.chatgpt.entity.chat.ChatCompletionResponse;
 import com.lzhpo.chatgpt.entity.completions.CompletionRequest;
@@ -269,4 +270,13 @@ public interface OpenAiClient {
      * @return {@link SubscriptionResponse}
      */
     SubscriptionResponse billingSubscription();
+
+    /**
+     * Query billing usage.
+     *
+     * @param startDate startDate
+     * @param endDate endDate
+     * @return {@link UsageResponse}
+     */
+    UsageResponse billingUsage(@NotBlank String startDate, @NotBlank String endDate);
 }
