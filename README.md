@@ -82,7 +82,7 @@ openai:
 
 #### 3.1 方式1 - 只配置了代理
 
-如果只是配置了国内中转代理，那么只需要配置`openai.domain`为代理地址即可。
+如果只是配置了国内中转代理，那么只需要配置`openai.domain`为代理地址即可，默认值为https://api.openai.com
 
 ```yaml
 openai:
