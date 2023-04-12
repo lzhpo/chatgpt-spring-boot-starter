@@ -17,7 +17,6 @@
 package com.lzhpo.chatgpt;
 
 import java.net.Proxy;
-import java.time.Duration;
 import lombok.Data;
 
 /**
@@ -55,19 +54,4 @@ public class OpenAiProxy {
      * The header name to provide to proxy server.
      */
     private String headerName = "Proxy-Authorization";
-
-    /**
-     * The connect timeout.
-     */
-    private Duration connectTimeout = Duration.ofMinutes(1);
-
-    /**
-     * The read timeout.
-     */
-    private Duration readTimeout = Duration.ofMinutes(1);
-
-    /**
-     * The write timeout.
-     */
-    private Duration writeTimeout = Duration.ofMinutes(1);
 }

@@ -45,13 +45,13 @@ openai:
 #    users: "https://api.openai.com/v1/organizations/{organizationId}/users"
 #    billing-subscription: "https://api.openai.com/v1/dashboard/billing/subscription"
 #    billing-usage: "https://api.openai.com/v1/dashboard/billing/usage?start_date={start_date}&end_date={end_date}"
+  connect-timeout: 1m
+  read-timeout: 1m
+  write-timeout: 1m
   proxy:
     host: "127.0.0.1"
     port: 7890
     type: http
 #    header-name: "Proxy-Authorization"
-#    connect-timeout: 1m
-#    read-timeout: 1m
-#    write-timeout: 1m
 #    username: admin
 #    password: 123456

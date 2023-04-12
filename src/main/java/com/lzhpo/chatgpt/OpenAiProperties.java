@@ -16,6 +16,7 @@
 
 package com.lzhpo.chatgpt;
 
+import java.time.Duration;
 import java.util.*;
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -48,4 +49,19 @@ public class OpenAiProperties {
      * The openAi or proxy address.
      */
     private String domain = "https://api.openai.com";
+
+    /**
+     * The connect timeout.
+     */
+    private Duration connectTimeout = Duration.ofMinutes(1);
+
+    /**
+     * The read timeout.
+     */
+    private Duration readTimeout = Duration.ofMinutes(1);
+
+    /**
+     * The write timeout.
+     */
+    private Duration writeTimeout = Duration.ofMinutes(1);
 }

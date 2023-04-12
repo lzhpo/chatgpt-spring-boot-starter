@@ -32,13 +32,13 @@ public class OpenAiAutoConfiguration {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         PropertyMapper mapper = PropertyMapper.get().alwaysApplyingWhenNonNull();
         mapper.from(interceptors).to(x -> builder.interceptors().addAll(x));
+        mapper.from(openAiProperties::getReadTimeout).to(builder::readTimeout);
+        mapper.from(openAiProperties::getWriteTimeout).to(builder::writeTimeout);
+        mapper.from(openAiProperties::getConnectTimeout).to(builder::connectTimeout);
         return Optional.ofNullable(openAiProperties.getProxy())
                 .map(proxy -> {
                     String username = proxy.getUsername();
                     String password = proxy.getPassword();
-                    mapper.from(proxy::getReadTimeout).to(builder::readTimeout);
-                    mapper.from(proxy::getWriteTimeout).to(builder::writeTimeout);
-                    mapper.from(proxy::getConnectTimeout).to(builder::connectTimeout);
                     mapper.from(() -> StrUtil.isAllNotBlank(username, password))
                             .whenTrue()
                             .toCall(() -> builder.proxyAuthenticator((route, response) -> response.request()

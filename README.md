@@ -66,18 +66,24 @@ openai:
     port: 7890
     type: http
     header-name: "Proxy-Authorization"
-    connect-timeout: 1m
-    read-timeout: 1m
-    write-timeout: 1m
     username: admin
     password: 123456
 ```
 
-### 3. 支持自定义请求API
+### 3. 支持配置超时时间
+
+```yaml
+openai:
+  connect-timeout: 1m
+  read-timeout: 1m
+  write-timeout: 1m
+```
+
+### 4. 支持自定义请求API
 
 > 如果没有配置代理，也没有定制完整请求地址的需求，那么无需配置`openai.domain`以及`openai.urls`，会自动使用默认的。
 
-#### 3.1 方式1 - 只配置了代理
+#### 4.1 方式1 - 只配置了代理
 
 如果只是配置了国内中转代理，那么只需要配置`openai.domain`为代理地址即可，默认值为https://api.openai.com
 
@@ -86,7 +92,7 @@ openai:
   domain: "https://api.openai.com"
 ```
 
-#### 3.2 方式2 - 定制完整的请求地址
+#### 4.2 方式2 - 定制完整的请求地址
 
 如果有定制完整请求地址的需求，可以按照如下配置，优先级比`openai.domain`更高，但需要的是**完整的请求地址**。
 
