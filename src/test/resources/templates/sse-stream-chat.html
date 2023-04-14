@@ -96,7 +96,7 @@
               </li>
             `);
 
-            const eventSource = new EventSource(`http://127.0.0.1:6060/chat/sse?content=${content}`);
+            const eventSource = new EventSource(`http://127.0.0.1:6060/chat/sse?message=${content}`);
             eventSource.onopen = function(event) {
                 $stopButton.removeClass("layui-btn-disabled");
             }

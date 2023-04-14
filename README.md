@@ -152,7 +152,7 @@ public class ChatController {
     private final OpenAiClient openAiClient;
 
     @GetMapping("/chat/sse")
-    public SseEmitter sseStreamChat(@RequestParam String content) {
+    public SseEmitter sseStreamChat(@RequestParam String message) {
         SseEmitter sseEmitter = new SseEmitter();
         ChatCompletionRequest request = ChatCompletionRequest.create(message);
         openAiClient.streamChatCompletions(request, new SseEventSourceListener(sseEmitter));
@@ -164,8 +164,8 @@ public class ChatController {
 
 前端代码简单示例：
 ```javascript
-// content为需要发送的消息
-const eventSource = new EventSource(`http://127.0.0.1:6060/chat/sse?content=${content}`);
+// message为需要发送的消息
+const eventSource = new EventSource(`http://127.0.0.1:6060/chat/sse?message=${message}`);
 // 收到消息处理
 eventSource.onmessage = function(event) {
     // 略...
@@ -223,8 +223,8 @@ public ServerEndpointExporter serverEndpointExporter() {
 前端代码主要逻辑如下：
 ```javascript
 const websocket = new WebSocket("ws://127.0.0.1:6060/chat/websocket");
-// 发送消息（content为需要发送的消息）
-websocket.send(content);
+// 发送消息（message为需要发送的消息）
+websocket.send(message);
 // 收到消息
 websocket.onmessage = function(event) {
     // 略...

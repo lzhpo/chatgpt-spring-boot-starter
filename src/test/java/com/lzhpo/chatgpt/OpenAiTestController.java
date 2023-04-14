@@ -64,9 +64,9 @@ public class OpenAiTestController {
 
     @ResponseBody
     @GetMapping("/chat/sse")
-    public SseEmitter sseStreamChat(@RequestParam String content) {
+    public SseEmitter sseStreamChat(@RequestParam String message) {
         SseEmitter sseEmitter = new SseEmitter();
-        ChatCompletionRequest request = ChatCompletionRequest.create(content);
+        ChatCompletionRequest request = ChatCompletionRequest.create(message);
         openAiClient.streamChatCompletions(request, new SseEventSourceListener(sseEmitter));
         return sseEmitter;
     }
