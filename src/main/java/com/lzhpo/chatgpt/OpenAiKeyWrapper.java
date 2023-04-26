@@ -16,6 +16,8 @@
 
 package com.lzhpo.chatgpt;
 
+import cn.hutool.cache.CacheUtil;
+import cn.hutool.cache.impl.LFUCache;
 import cn.hutool.core.lang.WeightRandom;
 import cn.hutool.core.util.HashUtil;
 import java.util.*;
@@ -32,7 +34,7 @@ import org.springframework.util.Assert;
 public class OpenAiKeyWrapper {
 
     private final OpenAiKeyProvider openAiKeyProvider;
-    private final Map<Long, WeightRandom<String>> openAiKeyCacheMap = new HashMap<>();
+    private final LFUCache<Long, WeightRandom<String>> randomLFUCache = CacheUtil.newLFUCache(0);
 
     /**
      * Wrap the {@link OpenAiKeyProvider#get()} result, in order to make api keys has weight random power.
@@ -43,14 +45,14 @@ public class OpenAiKeyWrapper {
         List<OpenAiKey> openAiKeys = openAiKeyProvider.get();
         Assert.notEmpty(openAiKeys, "The api keys is empty.");
         long cacheKey = HashUtil.murmur64(openAiKeys.toString().getBytes());
-        return Optional.ofNullable(openAiKeyCacheMap.get(cacheKey)).orElseGet(() -> {
+        return Optional.ofNullable(randomLFUCache.get(cacheKey)).orElseGet(() -> {
             log.debug("Not found openAiKeys in cache, will generate new one api key weight random.");
             Set<WeightRandom.WeightObj<String>> weightObjSet = openAiKeys.stream()
                     .filter(OpenAiKey::isEnabled)
                     .map(obj -> new WeightRandom.WeightObj<>(obj.getKey(), obj.getWeight()))
                     .collect(Collectors.toSet());
             WeightRandom<String> weightRandom = new WeightRandom<>(weightObjSet);
-            openAiKeyCacheMap.put(cacheKey, weightRandom);
+            randomLFUCache.put(cacheKey, weightRandom);
             return weightRandom;
         });
     }

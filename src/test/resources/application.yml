@@ -12,10 +12,13 @@ openai:
       enabled: true
     - key: "sk-xxx2"
       weight: 2.0
-      enabled: false
-    - key: "sk-xxx3"
+      enabled: true
+    - key: "sk-xxx"
       weight: 3.0
-      enabled: false
+      enabled: true
+    - key: "sk-xxx"
+      weight: 3.0
+      enabled: true
 #  domain: "https://api.openai.com"
 #  urls:
 #    moderations: "https://api.openai.com/v1/moderations"

@@ -53,8 +53,6 @@ public class InnerOpenAiKeyProvider implements OpenAiKeyProvider {
 
     @Override
     public List<OpenAiKey> get() {
-        List<OpenAiKey> openAiKeys = OPEN_AI_KEYS_MAP.get(++controlNum);
-        log.debug("Get the api keys: {}", openAiKeys);
-        return openAiKeys;
+        return OPEN_AI_KEYS_MAP.get(Math.min(++controlNum, 4));
     }
 }
