@@ -41,7 +41,9 @@
 
 ### 1. 支持配置多个 API Key（权重、是否启用）
 
-> 可以对当前 api key 设置权重，以及是否需要启用此 api key
+> 可以对当前 api key 设置权重，以及是否需要启用此 api key，提供了两种方式配置。
+
+#### 1.1 方式1-常规yaml配置方式
 
 ```yaml
 openai:
@@ -55,6 +57,24 @@ openai:
     - key: "sk-xxx3"
       weight: 3.0
       enabled: false
+```
+
+#### 1.2 方式2-自定义获取 API Key 逻辑
+
+实现`OpenAiKeyProvider`接口即可，例如：
+```java
+@Component
+public class XxxOpenAiKeyProvider implements OpenAiKeyProvider {
+
+    @Override
+    public List<OpenAiKey> get() {
+        List<OpenAiKey> openAiKeys = new ArrayList<>();
+        openAiKeys.add(OpenAiKey.builder().key("sk-xxx1").weight(1.0).enabled(true).build());
+        openAiKeys.add(OpenAiKey.builder().key("sk-xxx2").weight(2.0).enabled(false).build());
+        openAiKeys.add(OpenAiKey.builder().key("sk-xxx2").weight(3.0).enabled(true).build());
+        return openAiKeys;
+    }
+}
 ```
 
 ### 2. 支持配置代理
