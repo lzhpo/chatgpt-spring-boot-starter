@@ -1,15 +1,14 @@
 package com.lzhpo.chatgpt;
 
-import cn.hutool.core.lang.WeightRandom;
 import cn.hutool.core.util.StrUtil;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
-import okhttp3.*;
+import okhttp3.Credentials;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -55,25 +54,20 @@ public class OpenAiAutoConfiguration {
     @ConditionalOnMissingBean
     public OpenAiClient openAiService(
             OkHttpClient okHttpClient,
-            WeightRandom<String> apiKeyWeightRandom,
+            OpenAiKeyWrapper openAiKeyWrapper,
             ObjectProvider<UriTemplateHandler> uriTemplateHandlerObjectProvider) {
         UriTemplateHandler uriTemplateHandler = uriTemplateHandlerObjectProvider.getIfAvailable(() -> {
             DefaultUriBuilderFactory uriBuilderFactory = new DefaultUriBuilderFactory();
             uriBuilderFactory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.URI_COMPONENT);
             return uriBuilderFactory;
         });
-        return new DefaultOpenAiClient(okHttpClient, openAiProperties, uriTemplateHandler, apiKeyWeightRandom);
+        return new DefaultOpenAiClient(okHttpClient, openAiProperties, uriTemplateHandler, openAiKeyWrapper);
     }
 
     @Bean
     @ConditionalOnMissingBean
-    public WeightRandom<String> apiKeyWeightRandom(OpenAiKeyProvider openAiKeyProvider) {
-        List<OpenAiKey> openAiKeys = openAiKeyProvider.get();
-        Set<WeightRandom.WeightObj<String>> weightObjSet = openAiKeys.stream()
-                .filter(OpenAiKey::isEnabled)
-                .map(obj -> new WeightRandom.WeightObj<>(obj.getKey(), obj.getWeight()))
-                .collect(Collectors.toSet());
-        return new WeightRandom<>(weightObjSet);
+    public OpenAiKeyWrapper openAiKeyWrapper(OpenAiKeyProvider openAiKeyProvider) {
+        return new OpenAiKeyWrapper(openAiKeyProvider);
     }
 
     @Bean

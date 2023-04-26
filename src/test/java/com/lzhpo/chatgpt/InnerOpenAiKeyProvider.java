@@ -17,21 +17,44 @@
 package com.lzhpo.chatgpt;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author lzhpo
  */
+@Slf4j
 public class InnerOpenAiKeyProvider implements OpenAiKeyProvider {
+
+    private int controlNum;
+    private static final Map<Integer, List<OpenAiKey>> OPEN_AI_KEYS_MAP = new HashMap<>();
+
+    static {
+        // spotless:off
+        List<OpenAiKey> openAiKeys1 = new ArrayList<>();
+        openAiKeys1.add(OpenAiKey.builder().key("sk-xxx1").weight(1.0).enabled(true).build());
+        OPEN_AI_KEYS_MAP.put(1, openAiKeys1);
+
+        List<OpenAiKey> openAiKeys2 = new ArrayList<>();
+        openAiKeys2.add(OpenAiKey.builder().key("sk-xxx2").weight(2.0).enabled(true).build());
+        OPEN_AI_KEYS_MAP.put(2, openAiKeys2);
+
+        List<OpenAiKey> openAiKeys3 = new ArrayList<>();
+        openAiKeys3.add(OpenAiKey.builder().key("sk-xxx").weight(666.0).enabled(true).build());
+        OPEN_AI_KEYS_MAP.put(3, openAiKeys3);
+
+        List<OpenAiKey> openAiKeys4 = new ArrayList<>();
+        openAiKeys4.add(OpenAiKey.builder().key("sk-xxx").weight(666.0).enabled(true).build());
+        OPEN_AI_KEYS_MAP.put(4, openAiKeys4);
+        // spotless:on
+    }
 
     @Override
     public List<OpenAiKey> get() {
-        // spotless:off
-        List<OpenAiKey> openAiKeys = new ArrayList<>();
-        openAiKeys.add(OpenAiKey.builder().key("sk-xxx1").weight(1.0).enabled(true).build());
-        openAiKeys.add(OpenAiKey.builder().key("sk-xxx2").weight(2.0).enabled(false).build());
-        openAiKeys.add(OpenAiKey.builder().key("sk-xxx2").weight(3.0).enabled(true).build());
-        // spotless:on
+        List<OpenAiKey> openAiKeys = OPEN_AI_KEYS_MAP.get(++controlNum);
+        log.debug("Get the api keys: {}", openAiKeys);
         return openAiKeys;
     }
 }

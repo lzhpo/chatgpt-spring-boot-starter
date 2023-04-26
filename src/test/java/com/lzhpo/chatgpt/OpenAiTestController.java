@@ -16,7 +16,6 @@
 
 package com.lzhpo.chatgpt;
 
-import cn.hutool.core.lang.WeightRandom;
 import com.lzhpo.chatgpt.entity.chat.ChatCompletionRequest;
 import com.lzhpo.chatgpt.entity.chat.ChatCompletionResponse;
 import com.lzhpo.chatgpt.sse.SseEventSourceListener;
@@ -37,12 +36,12 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 public class OpenAiTestController {
 
     private final OpenAiClient openAiClient;
-    private final WeightRandom<String> apiKeyWeightRandom;
+    private final OpenAiKeyWrapper openAiKeyWrapper;
 
     @GetMapping("/page/chat")
     public ModelAndView chatView() {
         ModelAndView view = new ModelAndView("chat");
-        view.addObject("apiKey", apiKeyWeightRandom.next());
+        view.addObject("apiKey", openAiKeyWrapper.wrap().next());
         return view;
     }
 

@@ -26,6 +26,8 @@ public interface OpenAiKeyProvider {
     /**
      * Get the {@link OpenAiKey}.
      *
+     * <p>Notes: if you get the api keys from DB, also can add cache to improve speed.
+     *
      * @return list of {@link OpenAiKey}
      */
     List<OpenAiKey> get();

@@ -79,6 +79,8 @@ public class XxxOpenAiKeyProvider implements OpenAiKeyProvider {
 }
 ```
 
+**注意：每次请求都会调用此方法，有需要的话可以在此加一个缓存。**
+
 ### 2. 支持配置代理
 
 ```yaml

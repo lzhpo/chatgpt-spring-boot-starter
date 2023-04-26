@@ -18,9 +18,9 @@ package com.lzhpo.chatgpt;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import cn.hutool.core.lang.Console;
 import com.lzhpo.chatgpt.entity.model.ListModelsResponse;
-import com.lzhpo.chatgpt.utils.JsonUtils;
+import com.lzhpo.chatgpt.entity.model.RetrieveModelResponse;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -43,8 +43,15 @@ class OpenAiKeyProviderTest {
 
     @Test
     void models() {
-        ListModelsResponse response = openAiService.models();
-        assertNotNull(response);
-        Console.log(JsonUtils.toJsonPrettyString(response));
+        ListModelsResponse modelsResponse = openAiService.models();
+        assertNotNull(modelsResponse);
+        List<RetrieveModelResponse> modelsResponseData = modelsResponse.getData();
+        assertNotNull(modelsResponse);
+
+        for (int i = 0; i < Math.min(modelsResponseData.size(), 3); i++) {
+            RetrieveModelResponse modelEntry = modelsResponseData.get(i);
+            RetrieveModelResponse retrieveModelResponse = openAiService.retrieveModel(modelEntry.getId());
+            assertNotNull(retrieveModelResponse);
+        }
     }
 }
