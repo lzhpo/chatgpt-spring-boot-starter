@@ -61,6 +61,8 @@ openai:
 
 #### 1.2 方式2-自定义获取 API Key 逻辑
 
+如果你的 API Key 是存在数据库或者其它地方的，那么可以选择使用这种方式配置。
+
 实现`OpenAiKeyProvider`接口即可，例如：
 ```java
 @Component
