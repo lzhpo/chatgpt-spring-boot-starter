@@ -639,4 +639,4 @@ class OpenAiClientTest {
 
 ## 微信公众号
 
-<img src="./does/images/WeChat-MP.png" width="450" height="150">
+<img src="./does/images/WeChat-MP.png" width="450" height="150" alt="会打篮球的程序猿">
