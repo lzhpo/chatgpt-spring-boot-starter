@@ -27,6 +27,11 @@
 ✅ 用户信息查询（User）<br>
 ✅ 根据提示创建、编辑图像、根据图像生成多版本图像（Image - Create/Create edit/Create variation）
 
+## 项目地址
+
+- Github: https://github.com/lzhpo/chatgpt-spring-boot-starter
+- Gitee: https://gitee.com/lzhpo/chatgpt-spring-boot-starter
+
 ## 导入依赖
 
 ```xml
