@@ -152,6 +152,11 @@ openai:
     billing-usage: "https://api.openai.com/v1/dashboard/billing/usage?start_date={start_date}&end_date={end_date}"
 ```
 
+### 5. 关于异常处理
+
+常规、SSE以及WebSocket请求失败均会抛出`OpenAiException`异常。
+如果需要自定义流式处理的EventSourceListener，推荐继承`AbstractEventSourceListener`，如果没有特殊需求，直接重写`onEvent`方法即可，如果重写了`onFailure`方法，抛出何种异常取决于重写的`onFailure`方法。
+
 ## 代码示例
 
 ### 1. 流式输出（“打字机”）
