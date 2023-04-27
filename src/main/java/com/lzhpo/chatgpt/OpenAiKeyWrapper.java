@@ -22,6 +22,7 @@ import cn.hutool.core.lang.WeightRandom;
 import cn.hutool.core.util.HashUtil;
 import java.util.*;
 import java.util.stream.Collectors;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
@@ -30,6 +31,7 @@ import org.springframework.util.Assert;
  * @author lzhpo
  */
 @Slf4j
+@Getter
 @RequiredArgsConstructor
 public class OpenAiKeyWrapper {
 
