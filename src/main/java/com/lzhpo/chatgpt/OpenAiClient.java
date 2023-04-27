@@ -45,6 +45,8 @@ import com.lzhpo.chatgpt.entity.users.UserResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+
+import com.lzhpo.chatgpt.sse.Listener;
 import okhttp3.sse.EventSourceListener;
 import org.springframework.core.io.Resource;
 
@@ -75,7 +77,7 @@ public interface OpenAiClient {
      * @param request {@link CompletionRequest}
      * @param listener {@link EventSourceListener}
      */
-    void streamCompletions(@Valid CompletionRequest request, @NotNull EventSourceListener listener);
+    void streamCompletions(@Valid CompletionRequest request, @NotNull Listener listener);
 
     /**
      * Create edit.

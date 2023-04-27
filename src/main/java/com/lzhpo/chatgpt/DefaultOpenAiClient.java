@@ -49,6 +49,7 @@ import com.lzhpo.chatgpt.entity.model.RetrieveModelResponse;
 import com.lzhpo.chatgpt.entity.moderations.ModerationRequest;
 import com.lzhpo.chatgpt.entity.moderations.ModerationResponse;
 import com.lzhpo.chatgpt.entity.users.UserResponse;
+import com.lzhpo.chatgpt.sse.Listener;
 import com.lzhpo.chatgpt.utils.JsonUtils;
 import java.net.URI;
 import java.util.Map;
@@ -92,10 +93,10 @@ public class DefaultOpenAiClient implements OpenAiClient {
     }
 
     @Override
-    public void streamCompletions(CompletionRequest request, EventSourceListener listener) {
+    public void streamCompletions(CompletionRequest request, Listener listener) {
         request.setStream(true);
         Request clientRequest = createRequest(COMPLETIONS, createRequestBody(request));
-        RealEventSource realEventSource = new RealEventSource(clientRequest, listener);
+        RealEventSource realEventSource = new RealEventSource(clientRequest, (EventSourceListener) listener);
         realEventSource.connect(okHttpClient);
     }
 

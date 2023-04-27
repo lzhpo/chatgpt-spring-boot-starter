@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
  * @author lzhpo
  */
 @Slf4j
-public class CountDownLatchEventSourceListener extends LoggingEventSourceListener {
+public class CountDownLatchEventSourceListener extends LoggingEventSourceListener implements Listener{
 
     private final CountDownLatch countDownLatch;
 

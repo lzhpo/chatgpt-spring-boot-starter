@@ -22,6 +22,8 @@ import com.lzhpo.chatgpt.entity.chat.ChatCompletionResponse;
 import com.lzhpo.chatgpt.sse.SseEventSourceListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -36,7 +38,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @RequiredArgsConstructor
 public class OpenAiTestController {
 
-    private final OpenAiClient openAiClient;
+    private final DefaultOpenAiClient openAiClient;
     private final WeightRandom<String> apiKeyWeightRandom;
 
     @GetMapping("/page/chat")

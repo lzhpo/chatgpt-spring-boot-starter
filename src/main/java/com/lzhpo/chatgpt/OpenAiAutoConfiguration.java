@@ -8,14 +8,18 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import com.luna.common.net.HttpUtils;
 import lombok.RequiredArgsConstructor;
 import okhttp3.*;
 import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.context.properties.PropertyMapper;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Scope;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 import org.springframework.web.util.UriTemplateHandler;
 
@@ -53,7 +57,7 @@ public class OpenAiAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public OpenAiClient openAiService(
+    public DefaultOpenAiClient openAiService(
             OkHttpClient okHttpClient,
             WeightRandom<String> apiKeyWeightRandom,
             ObjectProvider<UriTemplateHandler> uriTemplateHandlerObjectProvider) {
@@ -63,6 +67,24 @@ public class OpenAiAutoConfiguration {
             return uriBuilderFactory;
         });
         return new DefaultOpenAiClient(okHttpClient, openAiProperties, uriTemplateHandler, apiKeyWeightRandom);
+    }
+
+    @Bean(name = "httpOpenAiService")
+    @ConditionalOnMissingBean
+    public HttpOpenAiClient openAiService(
+            WeightRandom<String> apiKeyWeightRandom,
+            ObjectProvider<UriTemplateHandler> uriTemplateHandlerObjectProvider) {
+        UriTemplateHandler uriTemplateHandler = uriTemplateHandlerObjectProvider.getIfAvailable(() -> {
+            DefaultUriBuilderFactory uriBuilderFactory = new DefaultUriBuilderFactory();
+            uriBuilderFactory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.URI_COMPONENT);
+            return uriBuilderFactory;
+        });
+        PropertyMapper mapper = PropertyMapper.get().alwaysApplyingWhenNonNull();
+        mapper.from(openAiProperties::getReadTimeout).to(e->HttpUtils.setResponseTimeout((int) e.getSeconds()));
+        mapper.from(openAiProperties::getWriteTimeout).to(e->HttpUtils.setSocketTimeOut((int) e.getSeconds()));
+        mapper.from(openAiProperties::getConnectTimeout).to(e->HttpUtils.setConnectTimeout((int) e.getSeconds()));
+        Optional.ofNullable(openAiProperties.getProxy()).ifPresent(e-> HttpUtils.setProxy(e.getHost(), e.getPort(), e.getUsername(), e.getPassword()));
+        return new HttpOpenAiClient(openAiProperties, uriTemplateHandler, apiKeyWeightRandom);
     }
 
     @Bean
