@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
  * @author lzhpo
  */
 @Slf4j
-public class WebSocketEventSourceListener extends LoggingEventSourceListener {
+public class WebSocketEventSourceListener extends AbstractEventSourceListener {
 
     private final Session session;
 

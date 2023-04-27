@@ -53,5 +53,6 @@ public class OpenAiWebSocketTest {
     @OnError
     public void onError(Session session, Throwable e) {
         log.error("sessionId={} error: {}", session.getId(), e.getMessage(), e);
+        throw new OpenAiException(e.getMessage());
     }
 }

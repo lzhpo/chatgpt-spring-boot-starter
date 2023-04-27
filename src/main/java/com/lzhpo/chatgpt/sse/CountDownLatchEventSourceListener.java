@@ -30,7 +30,7 @@ import org.springframework.util.Assert;
  * @author lzhpo
  */
 @Slf4j
-public class CountDownLatchEventSourceListener extends LoggingEventSourceListener {
+public class CountDownLatchEventSourceListener extends AbstractEventSourceListener {
 
     private final CountDownLatch countDownLatch;
 
@@ -48,8 +48,8 @@ public class CountDownLatchEventSourceListener extends LoggingEventSourceListene
 
     @Override
     public void onFailure(@NotNull EventSource eventSource, @Nullable Throwable e, @Nullable Response response) {
-        super.onFailure(eventSource, e, response);
         eventSource.cancel();
         countDownLatch.countDown();
+        super.onFailure(eventSource, e, response);
     }
 }

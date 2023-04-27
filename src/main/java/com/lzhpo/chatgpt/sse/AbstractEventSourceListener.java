@@ -16,6 +16,8 @@
 
 package com.lzhpo.chatgpt.sse;
 
+import com.lzhpo.chatgpt.OpenAiException;
+import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Response;
@@ -25,12 +27,12 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * Just logging listener for <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events</a>.
+ * Abstract listener for <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events</a>.
  *
  * @author lzhpo
  */
 @Slf4j
-public class LoggingEventSourceListener extends EventSourceListener {
+public class AbstractEventSourceListener extends EventSourceListener {
 
     @Override
     public void onClosed(@NotNull EventSource eventSource) {
@@ -46,8 +48,11 @@ public class LoggingEventSourceListener extends EventSourceListener {
 
     @Override
     public void onFailure(@NotNull EventSource eventSource, @Nullable Throwable e, @Nullable Response response) {
-        String errorMsg = Optional.ofNullable(e).map(Throwable::getMessage).orElse("");
+        String errorMsg = Optional.ofNullable(e)
+                .map(Throwable::getMessage)
+                .orElseGet(() -> Objects.nonNull(response) ? response.toString() : "Unexpected exception");
         log.error("Execute onFailure method, response: {}, error: {}", response, errorMsg);
+        throw new OpenAiException(errorMsg);
     }
 
     @Override
