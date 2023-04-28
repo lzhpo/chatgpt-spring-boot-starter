@@ -49,6 +49,7 @@
         <flatten-maven-plugin>1.2.7</flatten-maven-plugin>
         <hutool.version>5.8.18</hutool.version>
         <okhttp.version>4.10.0</okhttp.version>
+        <jtokkit.version>0.4.0</jtokkit.version>
     </properties>
 
     <dependencies>
@@ -107,6 +108,12 @@
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp-sse</artifactId>
             <version>${okhttp.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.knuddels</groupId>
+            <artifactId>jtokkit</artifactId>
+            <version>${jtokkit.version}</version>
         </dependency>
     </dependencies>
 
