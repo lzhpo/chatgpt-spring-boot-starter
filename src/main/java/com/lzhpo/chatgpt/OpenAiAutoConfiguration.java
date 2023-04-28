@@ -1,6 +1,5 @@
 package com.lzhpo.chatgpt;
 
-import cn.hutool.core.lang.WeightRandom;
 import cn.hutool.core.util.StrUtil;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -11,7 +10,9 @@ import java.util.stream.Collectors;
 
 import com.luna.common.net.HttpUtils;
 import lombok.RequiredArgsConstructor;
-import okhttp3.*;
+import okhttp3.Credentials;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
@@ -59,14 +60,20 @@ public class OpenAiAutoConfiguration {
     @ConditionalOnMissingBean
     public DefaultOpenAiClient openAiService(
             OkHttpClient okHttpClient,
-            WeightRandom<String> apiKeyWeightRandom,
+            OpenAiKeyWrapper openAiKeyWrapper,
             ObjectProvider<UriTemplateHandler> uriTemplateHandlerObjectProvider) {
         UriTemplateHandler uriTemplateHandler = uriTemplateHandlerObjectProvider.getIfAvailable(() -> {
             DefaultUriBuilderFactory uriBuilderFactory = new DefaultUriBuilderFactory();
             uriBuilderFactory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.URI_COMPONENT);
             return uriBuilderFactory;
         });
-        return new DefaultOpenAiClient(okHttpClient, openAiProperties, uriTemplateHandler, apiKeyWeightRandom);
+        return new DefaultOpenAiClient(okHttpClient, openAiProperties, uriTemplateHandler, openAiKeyWrapper);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public OpenAiKeyWrapper openAiKeyWrapper(OpenAiKeyProvider openAiKeyProvider) {
+        return new OpenAiKeyWrapper(openAiKeyProvider);
     }
 
     @Bean(name = "httpOpenAiService")
@@ -88,11 +95,8 @@ public class OpenAiAutoConfiguration {
     }
 
     @Bean
-    public WeightRandom<String> apiKeyWeightRandom(OpenAiProperties openAiProperties) {
-        Set<WeightRandom.WeightObj<String>> weightObjSet = openAiProperties.getKeys().stream()
-                .filter(OpenAiKeyWeight::isEnabled)
-                .map(obj -> new WeightRandom.WeightObj<>(obj.getKey(), obj.getWeight()))
-                .collect(Collectors.toSet());
-        return new WeightRandom<>(weightObjSet);
+    @ConditionalOnMissingBean
+    public OpenAiKeyProvider openAiKeyProvider() {
+        return openAiProperties::getKeys;
     }
 }

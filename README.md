@@ -11,6 +11,7 @@
 4. 支持OpenAi所有可以使用 API Key 访问的 API
 5. 支持流式响应，即所谓的"打字机"模式
 6. 请求参数自动校验
+7. 支持token计算
 
 ## 支持的功能
 
@@ -27,6 +28,11 @@
 ✅ 用户信息查询（User）<br>
 ✅ 根据提示创建、编辑图像、根据图像生成多版本图像（Image - Create/Create edit/Create variation）
 
+## 项目地址
+
+- Github: https://github.com/lzhpo/chatgpt-spring-boot-starter
+- Gitee: https://gitee.com/lzhpo/chatgpt-spring-boot-starter
+
 ## 导入依赖
 
 ```xml
@@ -41,7 +47,9 @@
 
 ### 1. 支持配置多个 API Key（权重、是否启用）
 
-> 可以对当前 api key 设置权重，以及是否需要启用此 api key
+> 可以对当前 api key 设置权重，以及是否需要启用此 api key，提供了两种方式配置。
+
+#### 1.1 方式1-常规yaml配置方式
 
 ```yaml
 openai:
@@ -56,6 +64,28 @@ openai:
       weight: 3.0
       enabled: false
 ```
+
+#### 1.2 方式2-自定义获取 API Key 逻辑
+
+如果你的 API Key 是存在数据库或者其它地方的，那么可以选择使用这种方式配置。
+
+实现`OpenAiKeyProvider`接口即可，例如：
+```java
+@Component
+public class XxxOpenAiKeyProvider implements OpenAiKeyProvider {
+
+    @Override
+    public List<OpenAiKey> get() {
+        List<OpenAiKey> openAiKeys = new ArrayList<>();
+        openAiKeys.add(OpenAiKey.builder().key("sk-xxx1").weight(1.0).enabled(true).build());
+        openAiKeys.add(OpenAiKey.builder().key("sk-xxx2").weight(2.0).enabled(false).build());
+        openAiKeys.add(OpenAiKey.builder().key("sk-xxx2").weight(3.0).enabled(true).build());
+        return openAiKeys;
+    }
+}
+```
+
+**注意：每次请求都会调用此方法，有需要的话可以在此加一个缓存。**
 
 ### 2. 支持配置代理
 
@@ -128,6 +158,40 @@ openai:
     billing-usage: "https://api.openai.com/v1/dashboard/billing/usage?start_date={start_date}&end_date={end_date}"
 ```
 
+### 5. 支持token计算
+
+示例1：
+```java
+Long tokens = TokenUtils.tokens(model, content);
+```
+
+示例2：`CompletionRequest`
+```java
+CompletionRequest request = new CompletionRequest();
+// request.setXXX 略...
+Long tokens = TokenUtils.tokens(request.getModel(), request.getPrompt());
+```
+
+示例3：`ChatCompletionRequest`
+```java
+ChatCompletionRequest request = new ChatCompletionRequest();
+// request.setXXX 略...
+Long tokens = TokenUtils.tokens(request.getModel(), request.getMessages());
+```
+
+OpenAi返回的token计算结果可在response返回体中获取：
+- `prompt_tokens`：OpenAi计算的输入消耗的token
+- `completion_tokens`：OpenAi计算的输出消耗的token
+- `total_tokens`：`prompt_tokens` + `completion_tokens`
+
+具体可参考测试用例`OpenAiCountTokensTest`以及`TokenUtils`
+
+### 6. 关于异常处理
+
+常规、SSE以及WebSocket请求失败均会抛出`OpenAiException`异常。
+
+如果需要自定义流式处理的EventSourceListener，推荐继承`AbstractEventSourceListener`，如果没有特殊需求，直接重写`onEvent`方法即可，如果重写了`onFailure`方法，抛出何种异常取决于重写的`onFailure`方法。
+
 ## 代码示例
 
 ### 1. 流式输出（“打字机”）
@@ -171,6 +235,9 @@ eventSource.onmessage = function(event) {
     // 略...
 }
 ```
+
+由于SSE协议只支持GET方法，不支持POST方法。<br/>
+如果要支持POST方法可以参考：https://github.com/Azure/fetch-event-source
 
 详细代码见仓库目录下：
 - `templates/chat.html`
@@ -606,3 +673,7 @@ class OpenAiClientTest {
     }
 }
 ```
+
+## 微信公众号
+
+<img src="./does/images/WeChat-MP.png" width="453" height="150" alt="会打篮球的程序猿">

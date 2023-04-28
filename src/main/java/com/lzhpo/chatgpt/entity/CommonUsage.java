@@ -25,12 +25,22 @@ import lombok.Data;
 @Data
 public class CommonUsage {
 
+    /**
+     * OpenAi calculate the input the number of tokens consumed.
+     */
     @JsonProperty("prompt_tokens")
     private Long promptTokens;
 
+    /**
+     * OpenAi calculate the output the number of tokens consumed.
+     */
     @JsonProperty("completion_tokens")
     private Long completionTokens;
 
+    /**
+     * OpenAi calculate the total number of tokens consumed by the input and output of this dialogue.
+     * <p>totalTokens = {@link #promptTokens} + {@link #completionTokens}
+     */
     @JsonProperty("total_tokens")
     private Long totalTokens;
 }

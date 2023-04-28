@@ -52,14 +52,14 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class OpenAiTestController {
 
+    private final OpenAiKeyWrapper openAiKeyWrapper;
     private final DefaultOpenAiClient openAiClient;
     private final HttpOpenAiClient  httpOpenAiClient;
-    private final WeightRandom<String> apiKeyWeightRandom;
 
     @GetMapping("/page/chat")
     public ModelAndView chatView() {
         ModelAndView view = new ModelAndView("chat");
-        view.addObject("apiKey", apiKeyWeightRandom.next());
+        view.addObject("apiKey", openAiKeyWrapper.wrap().next());
         return view;
     }
 

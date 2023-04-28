@@ -14,21 +14,21 @@
  * limitations under the License.
  */
 
-package com.lzhpo.chatgpt.entity.chat;
+package com.lzhpo.chatgpt;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
+import java.util.List;
 
 /**
  * @author lzhpo
  */
-@Data
-public class ChatCompletionChoice {
+public interface OpenAiKeyProvider {
 
-    private Long index;
-
-    private ChatCompletionMessage message;
-
-    @JsonProperty("finish_reason")
-    private String finishReason;
+    /**
+     * Get the {@link OpenAiKey}.
+     *
+     * <p>Notes: if you get the api keys from DB, also can add cache to improve speed.
+     *
+     * @return list of {@link OpenAiKey}
+     */
+    List<OpenAiKey> get();
 }

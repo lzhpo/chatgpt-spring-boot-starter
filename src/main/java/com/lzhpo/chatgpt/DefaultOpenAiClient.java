@@ -80,7 +80,7 @@ public class DefaultOpenAiClient implements OpenAiClient {
     private final OkHttpClient okHttpClient;
     private final OpenAiProperties openAiProperties;
     private final UriTemplateHandler uriTemplateHandler;
-    private final WeightRandom<String> apiKeyWeightRandom;
+    private final OpenAiKeyWrapper openAiKeyWrapper;
 
     @Override
     public ModerationResponse moderations(ModerationRequest request) {
@@ -291,6 +291,7 @@ public class DefaultOpenAiClient implements OpenAiClient {
     }
 
     private Request createRequest(OpenAiUrl openAiUrl, RequestBody requestBody, Object... uriVariables) {
+        WeightRandom<String> weightRandom = openAiKeyWrapper.wrap();
         Map<OpenAiUrl, String> configUrls = openAiProperties.getUrls();
         String requestUrl = configUrls.get(openAiUrl);
         if (!StringUtils.hasText(requestUrl)) {
@@ -299,7 +300,7 @@ public class DefaultOpenAiClient implements OpenAiClient {
         URI requestURI = uriTemplateHandler.expand(requestUrl, uriVariables);
         return new Request.Builder()
                 .url(Objects.requireNonNull(HttpUrl.get(requestURI)))
-                .header(Header.AUTHORIZATION.name(), BEARER.concat(apiKeyWeightRandom.next()))
+                .header(Header.AUTHORIZATION.name(), BEARER.concat(weightRandom.next()))
                 .method(openAiUrl.getMethod(), requestBody)
                 .build();
     }

@@ -16,13 +16,19 @@
 
 package com.lzhpo.chatgpt;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author lzhpo
  */
 @Data
-public class OpenAiKeyWeight {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class OpenAiKey {
 
     /**
      * This api key.
@@ -37,5 +43,6 @@ public class OpenAiKeyWeight {
     /**
      * Whether enable this api key.
      */
+    @Builder.Default
     private boolean enabled = true;
 }

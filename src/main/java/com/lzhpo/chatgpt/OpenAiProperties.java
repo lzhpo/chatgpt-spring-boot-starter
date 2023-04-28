@@ -32,7 +32,7 @@ public class OpenAiProperties {
     /**
      * The openAI API keys.
      */
-    private List<OpenAiKeyWeight> keys = new ArrayList<>();
+    private List<OpenAiKey> keys = new ArrayList<>();
 
     /**
      * The openAi endpoint configuration.
