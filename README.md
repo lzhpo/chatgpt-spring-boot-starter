@@ -236,7 +236,8 @@ eventSource.onmessage = function(event) {
 }
 ```
 
-由于SSE协议只支持GET方法，不支持POST方法，如果要支持POST方法可以使用`fetch-event-source`：https://github.com/Azure/fetch-event-source
+由于SSE协议只支持GET方法，不支持POST方法。<br/>
+如果要支持POST方法可以参考：https://github.com/Azure/fetch-event-source
 
 详细代码见仓库目录下：
 - `templates/chat.html`
