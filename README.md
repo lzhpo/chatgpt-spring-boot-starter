@@ -179,6 +179,11 @@ ChatCompletionRequest request = new ChatCompletionRequest();
 Long tokens = TokenUtils.tokens(request.getModel(), request.getMessages());
 ```
 
+OpenAi返回的token计算结果可在response返回体中获取：
+- `prompt_tokens`：OpenAi计算的输入消耗的token
+- `completion_tokens`：OpenAi计算的输出消耗的token
+- `total_tokens`：`prompt_tokens` + `completion_tokens`
+
 具体可参考测试用例`OpenAiCountTokensTest`以及`TokenUtils`
 
 ### 6. 关于异常处理
