@@ -19,6 +19,7 @@ package com.lzhpo.chatgpt;
 import com.lzhpo.chatgpt.entity.chat.ChatCompletionRequest;
 import com.lzhpo.chatgpt.entity.chat.ChatCompletionResponse;
 import com.lzhpo.chatgpt.sse.SseEventSourceListener;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
@@ -63,7 +64,7 @@ public class OpenAiTestController {
 
     @ResponseBody
     @GetMapping("/chat/sse")
-    public SseEmitter sseStreamChat(@RequestParam String message) {
+    public SseEmitter sseStreamChat(@RequestHeader Map<String, String> headers, @RequestParam String message) {
         SseEmitter sseEmitter = new SseEmitter();
         ChatCompletionRequest request = ChatCompletionRequest.create(message);
         openAiClient.streamChatCompletions(request, new SseEventSourceListener(sseEmitter));

@@ -11,6 +11,7 @@
 4. 支持OpenAi所有可以使用 API Key 访问的 API
 5. 支持流式响应，即所谓的"打字机"模式
 6. 请求参数自动校验
+7. 支持token计算
 
 ## 支持的功能
 
@@ -157,7 +158,30 @@ openai:
     billing-usage: "https://api.openai.com/v1/dashboard/billing/usage?start_date={start_date}&end_date={end_date}"
 ```
 
-### 5. 关于异常处理
+### 5. 支持token计算
+
+示例1：
+```java
+Long tokens = TokenUtils.tokens(model, content);
+```
+
+示例2：`CompletionRequest`
+```java
+CompletionRequest request = new CompletionRequest();
+// request.setXXX 略...
+Long tokens = TokenUtils.tokens(request.getModel(), request.getPrompt());
+```
+
+示例3：`ChatCompletionRequest`
+```java
+ChatCompletionRequest request = new ChatCompletionRequest();
+// request.setXXX 略...
+Long tokens = TokenUtils.tokens(request.getModel(), request.getMessages());
+```
+
+具体可参考测试用例`OpenAiCountTokensTest`以及`TokenUtils`
+
+### 6. 关于异常处理
 
 常规、SSE以及WebSocket请求失败均会抛出`OpenAiException`异常。
 
@@ -207,7 +231,35 @@ eventSource.onmessage = function(event) {
 }
 ```
 
+由于SSE协议只支持GET方法，不支持POST方法，如果我们想向后端发送body也有替代办法。
+
+方法1：把body编码之后放在请求参数上，参考JS函数：`encodeURI()`、`encodeURIComponent()`、`escape()`
+
+方法2：使用`EventSourcePolyfill`，把body放在header中，后端就可以直接从header中获取。
+![](./does/images/EventSource不支持POST的替代办法.png)
+```js
+const eventSource = new EventSourcePolyfill(`http://127.0.0.1:6060/chat/sse?message=${content}`, {
+    headers: {
+        "name": "lzhpo",
+        "requestBody": `{"age":100,"hobby":"basketball"}`
+    }
+});
+eventSource.onmessage = function(event) {
+    // 略...
+}
+```
+
+```shell
+# 以jsdelivr举例，也可直接下载到本地引入
+https://cdn.jsdelivr.net/npm/event-source-polyfill@1.0.31/src/eventsource.min.js
+```
+```shell
+# 也可以直接 npm install
+npm install event-source-polyfill
+```
+
 详细代码见仓库目录下：
+- `static/lib/eventsource.js`
 - `templates/chat.html`
 - `templates/sse-stream-chat.html`
 - `com.lzhpo.chatgpt.OpenAiTestController`

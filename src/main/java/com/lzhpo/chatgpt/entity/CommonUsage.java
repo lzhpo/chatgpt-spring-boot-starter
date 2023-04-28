@@ -25,12 +25,22 @@ import lombok.Data;
 @Data
 public class CommonUsage {
 
+    /**
+     * Input the number of tokens consumed.
+     */
     @JsonProperty("prompt_tokens")
     private Long promptTokens;
 
+    /**
+     * Output the number of tokens consumed.
+     */
     @JsonProperty("completion_tokens")
     private Long completionTokens;
 
+    /**
+     * The total number of tokens consumed by the input and output of this dialogue.
+     * <p>totalTokens = {@link #promptTokens} + {@link #completionTokens}
+     */
     @JsonProperty("total_tokens")
     private Long totalTokens;
 }

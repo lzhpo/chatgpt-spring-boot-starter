@@ -56,8 +56,8 @@ class OpenAiCountTokensTest {
         request.setMaxTokens(7);
         request.setTemperature(0);
 
-        Long tokens = TokenUtils.tokens(request.getModel(), request.getPrompt());
-        Console.log("Count tokens for request: {}", tokens);
+        Long reqTokens = TokenUtils.tokens(request.getModel(), request.getPrompt());
+        Console.log("Count tokens for request: {}", reqTokens);
 
         CompletionResponse response = openAiService.completions(request);
         assertNotNull(response);
@@ -68,7 +68,7 @@ class OpenAiCountTokensTest {
         Console.log("Completion tokens: {}", usage.getCompletionTokens());
         Console.log("Total tokens: {}", usage.getTotalTokens());
 
-        assertEquals(promptTokens, tokens);
+        assertEquals(promptTokens, reqTokens);
         Console.log(JsonUtils.toJsonPrettyString(response));
     }
 
