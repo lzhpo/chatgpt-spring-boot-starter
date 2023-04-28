@@ -7,7 +7,7 @@ logging:
 
 openai:
   keys:
-    - key: "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"
+    - key: "sk-xxx1"
       weight: 1.0
       enabled: true
     - key: "sk-xxx2"

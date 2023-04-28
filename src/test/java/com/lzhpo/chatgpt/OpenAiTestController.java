@@ -16,12 +16,10 @@
 
 package com.lzhpo.chatgpt;
 
-import cn.hutool.core.lang.WeightRandom;
-import com.luna.common.date.DateUtils;
+import com.luna.common.thread.AsyncEngineUtils;
 import com.lzhpo.chatgpt.entity.chat.ChatCompletionRequest;
 import com.lzhpo.chatgpt.entity.chat.ChatCompletionResponse;
-import com.lzhpo.chatgpt.sse.CustomEventSourceListener;
-import com.lzhpo.chatgpt.sse.CustomSseFutureCallback;
+import com.lzhpo.chatgpt.sse.HttpSseEventSourceListener;
 import com.lzhpo.chatgpt.sse.SseEventSourceListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,19 +27,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-import reactor.core.publisher.Flux;
-import reactor.util.function.Tuples;
 
-import java.time.Duration;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Date;
-import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 /**
  * @author lzhpo
@@ -54,7 +43,7 @@ public class OpenAiTestController {
 
     private final OpenAiKeyWrapper openAiKeyWrapper;
     private final DefaultOpenAiClient openAiClient;
-    private final HttpOpenAiClient  httpOpenAiClient;
+    private final HttpOpenAiClient httpOpenAiClient;
 
     @GetMapping("/page/chat")
     public ModelAndView chatView() {
@@ -93,7 +82,7 @@ public class OpenAiTestController {
     public SseEmitter sseStreamHttpChat(@RequestParam String message) {
         SseEmitter sseEmitter = new SseEmitter();
         ChatCompletionRequest request = ChatCompletionRequest.create(message);
-        httpOpenAiClient.streamChatCompletions(request, new CustomEventSourceListener<>(sseEmitter));
+        httpOpenAiClient.streamChatCompletions(request, new HttpSseEventSourceListener<>(sseEmitter));
         return sseEmitter;
     }
 
@@ -103,7 +92,7 @@ public class OpenAiTestController {
         ExecutorService sseMvcExecutor = Executors.newSingleThreadExecutor();
         sseMvcExecutor.execute(() -> {
             try {
-                for (int i = 0; i< 5; i++) {
+                for (int i = 0; i < 5; i++) {
                     SseEmitter.SseEventBuilder event = SseEmitter.event()
                             .data("SSE MVC - " + LocalTime.now().toString())
                             .id(String.valueOf(i))

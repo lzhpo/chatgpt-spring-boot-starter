@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.luna.common.net.HttpUtils;
+import com.luna.common.net.high.AsyncHttpUtils;
 import lombok.RequiredArgsConstructor;
 import okhttp3.Credentials;
 import okhttp3.Interceptor;
@@ -79,7 +80,7 @@ public class OpenAiAutoConfiguration {
     @Bean(name = "httpOpenAiService")
     @ConditionalOnMissingBean
     public HttpOpenAiClient openAiService(
-            WeightRandom<String> apiKeyWeightRandom,
+            OpenAiKeyWrapper openAiKeyWrapper,
             ObjectProvider<UriTemplateHandler> uriTemplateHandlerObjectProvider) {
         UriTemplateHandler uriTemplateHandler = uriTemplateHandlerObjectProvider.getIfAvailable(() -> {
             DefaultUriBuilderFactory uriBuilderFactory = new DefaultUriBuilderFactory();
@@ -90,8 +91,8 @@ public class OpenAiAutoConfiguration {
         mapper.from(openAiProperties::getReadTimeout).to(e->HttpUtils.setResponseTimeout((int) e.getSeconds()));
         mapper.from(openAiProperties::getWriteTimeout).to(e->HttpUtils.setSocketTimeOut((int) e.getSeconds()));
         mapper.from(openAiProperties::getConnectTimeout).to(e->HttpUtils.setConnectTimeout((int) e.getSeconds()));
-        Optional.ofNullable(openAiProperties.getProxy()).ifPresent(e-> HttpUtils.setProxy(e.getHost(), e.getPort(), e.getUsername(), e.getPassword()));
-        return new HttpOpenAiClient(openAiProperties, uriTemplateHandler, apiKeyWeightRandom);
+        Optional.ofNullable(openAiProperties.getProxy()).ifPresent(e-> AsyncHttpUtils.setProxy(e.getHost(), e.getPort()));
+        return new HttpOpenAiClient(openAiProperties, uriTemplateHandler, openAiKeyWrapper);
     }
 
     @Bean

@@ -5,13 +5,13 @@ import com.google.common.collect.Maps;
 import com.luna.common.file.FileTools;
 import com.luna.common.net.HttpUtils;
 import com.luna.common.net.HttpUtilsConstant;
-import com.luna.common.net.async.CustomAbstacktFutureCallback;
 import com.luna.common.net.async.CustomSseAsyncConsumer;
 import com.luna.common.net.hander.AbstactEventFutureCallback;
 import com.luna.common.net.high.AsyncHttpUtils;
 import com.luna.common.net.sse.Event;
 import com.luna.common.net.sse.SseResponse;
 import com.luna.common.text.CharsetUtil;
+import com.luna.common.thread.AsyncEngineUtils;
 import com.lzhpo.chatgpt.entity.audio.CreateAudioRequest;
 import com.lzhpo.chatgpt.entity.audio.CreateAudioResponse;
 import com.lzhpo.chatgpt.entity.billing.CreditGrantsResponse;
@@ -38,7 +38,7 @@ import com.lzhpo.chatgpt.entity.model.RetrieveModelResponse;
 import com.lzhpo.chatgpt.entity.moderations.ModerationRequest;
 import com.lzhpo.chatgpt.entity.moderations.ModerationResponse;
 import com.lzhpo.chatgpt.entity.users.UserResponse;
-import com.lzhpo.chatgpt.sse.*;
+import com.lzhpo.chatgpt.sse.Listener;
 import com.lzhpo.chatgpt.utils.JsonUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -67,7 +67,6 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.CountDownLatch;
 
 import static com.lzhpo.chatgpt.OpenAiConstant.BEARER;
 import static com.lzhpo.chatgpt.OpenAiUrl.*;
@@ -84,7 +83,7 @@ public class HttpOpenAiClient implements OpenAiClient {
 
     private final OpenAiProperties openAiProperties;
     private final UriTemplateHandler uriTemplateHandler;
-    private final WeightRandom<String> apiKeyWeightRandom;
+    private final OpenAiKeyWrapper openAiKeyWrapper;
 
 
     @Override
@@ -244,10 +243,13 @@ public class HttpOpenAiClient implements OpenAiClient {
     }
 
     private String doRequest(OpenAiUrl openAiUrl, HttpEntity httpEntity, Object... uriVariables) {
-        URI requestUri = getUri(openAiUrl, uriVariables);
+        WeightRandom<String> weightRandom = openAiKeyWrapper.wrap();
+        Map<OpenAiUrl, String> configUrls = openAiProperties.getUrls();
+
+        URI requestUri = getUri(configUrls, openAiUrl, uriVariables);
 
         Map<String, String> header = Maps.newHashMap();
-        header.put(HttpHeaders.AUTHORIZATION, BEARER.concat(apiKeyWeightRandom.next()));
+        header.put(HttpHeaders.AUTHORIZATION, BEARER.concat(weightRandom.next()));
 
         String result;
         if (HttpMethod.POST.toString().equals(openAiUrl.getMethod())) {
@@ -262,23 +264,23 @@ public class HttpOpenAiClient implements OpenAiClient {
         return result;
     }
 
-    public  void doRequestAsync(OpenAiUrl openAiUrl, String body, Listener callback) {
-        URI requestUri = getUri(openAiUrl);
+    public void doRequestAsync(OpenAiUrl openAiUrl, String body, Listener callback, Object... uriVariable) {
+        WeightRandom<String> weightRandom = openAiKeyWrapper.wrap();
+        Map<OpenAiUrl, String> configUrls = openAiProperties.getUrls();
+        URI requestUri = getUri(configUrls, openAiUrl, uriVariable);
         Map<String, String> header = Maps.newHashMap();
-        header.put(HttpHeaders.AUTHORIZATION, BEARER.concat(apiKeyWeightRandom.next()));
+        header.put(HttpHeaders.AUTHORIZATION, BEARER.concat(weightRandom.next()));
 
         StringAsyncEntityProducer bodyProducer = new StringAsyncEntityProducer(body);
-        AsyncRequestProducer producer = AsyncHttpUtils.getProducer("http://localhost:6060", "/stream-sse-mvc", header, new HashMap<>(), bodyProducer, HttpMethod.GET.toString());
+        AsyncRequestProducer producer = AsyncHttpUtils.getProducer(openAiProperties.getDomain(), requestUri.getPath(), header, new HashMap<>(), bodyProducer, HttpMethod.GET.toString());
 
         // 事件处理器
         CustomSseAsyncConsumer customSseAsyncConsumer = new CustomSseAsyncConsumer((AbstactEventFutureCallback<SseResponse, Event>) callback);
-        SseResponse sseResponse = AsyncHttpUtils.doAsyncRequest(producer, customSseAsyncConsumer, null);
-        System.out.println(sseResponse);
+        AsyncEngineUtils.execute(() -> AsyncHttpUtils.doAsyncRequest(producer, customSseAsyncConsumer, null));
     }
 
     @NotNull
-    private URI getUri(OpenAiUrl openAiUrl, Object... uriVariables) {
-        Map<OpenAiUrl, String> configUrls = openAiProperties.getUrls();
+    private URI getUri(Map<OpenAiUrl, String> configUrls, OpenAiUrl openAiUrl, Object... uriVariables) {
         String url = configUrls.get(openAiUrl);
         if (!StringUtils.hasText(url)) {
             url = openAiUrl.getSuffix();
@@ -290,7 +292,6 @@ public class HttpOpenAiClient implements OpenAiClient {
 
     private HttpEntity createRequestBody(Object request) {
         String jsonString = JsonUtils.toJsonString(request);
-        System.out.println(jsonString);
         return new StringEntity(jsonString, Charset.defaultCharset());
     }
 

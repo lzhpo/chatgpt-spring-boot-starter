@@ -10,11 +10,11 @@ import java.io.IOException;
  * @date 2023/4/28
  */
 @Slf4j
-public class CustomEventSourceListener<T,R> extends AbstractFutureCallback<T,R>  {
+public class HttpSseEventSourceListener<T,R> extends AbstractFutureCallback<T,R>  {
 
     private  SseEmitter sseEmitter;
 
-    public CustomEventSourceListener(SseEmitter sseEmitter) {
+    public HttpSseEventSourceListener(SseEmitter sseEmitter) {
         this.sseEmitter = sseEmitter;
     }
 

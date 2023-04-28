@@ -167,7 +167,7 @@ class HttpOpenAiClientTest {
         request.setModel("gpt-3.5-turbo");
         request.setMessages(messages);
 
-        final CountDownLatch countDownLatch = new CountDownLatch(5);
+        final CountDownLatch countDownLatch = new CountDownLatch(1);
         CustomDownLatchEventFutureCallback<Event, SseResponse> eventSourceListener = new CustomDownLatchEventFutureCallback<>(countDownLatch);
         assertDoesNotThrow(() -> openAiService.streamChatCompletions(request, eventSourceListener));
         countDownLatch.await();

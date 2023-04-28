@@ -19,16 +19,7 @@ package com.lzhpo.chatgpt;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.MediaType;
-import org.springframework.http.codec.ServerSentEvent;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.socket.server.standard.ServerEndpointExporter;
-import reactor.core.publisher.Flux;
-import reactor.util.function.Tuples;
-
-import java.time.Duration;
-import java.time.LocalDateTime;
 
 /**
  * @author lzhpo

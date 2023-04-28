@@ -7,5 +7,5 @@ import com.luna.common.net.hander.AbstactEventFutureCallback;
  * @description
  * @date 2023/4/28
  */
-public class AbstractFutureCallback<T,R> extends AbstactEventFutureCallback<T,R> implements Listener{
+public class AbstractFutureCallback<T, R> extends AbstactEventFutureCallback<T, R> implements Listener {
 }
