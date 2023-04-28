@@ -1,21 +1,53 @@
 package com.lzhpo.chatgpt.sse;
-
-import com.luna.common.net.hander.AbstactEventSourceListener;
-import com.luna.common.net.sse.Event;
-import com.luna.common.net.sse.SseResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.hc.core5.concurrent.FutureCallback;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
+import java.io.IOException;
+
 /**
- * @author weidian
+ * @author luna
  * @description
  * @date 2023/4/28
  */
 @Slf4j
-public class CustomEventSourceListener extends AbstactEventSourceListener {
-    public CustomEventSourceListener(FutureCallback<Event> eventCallBack, FutureCallback<SseResponse> resultCallback) {
-        super(eventCallBack, resultCallback);
+public class CustomEventSourceListener<T,R> extends AbstractFutureCallback<T,R>  {
+
+    private  SseEmitter sseEmitter;
+
+    public CustomEventSourceListener(SseEmitter sseEmitter) {
+        this.sseEmitter = sseEmitter;
     }
+
+    @Override
+    public void onEvent(R result) {
+        try {
+            sseEmitter.send(result);
+        } catch (IOException e) {
+            log.error("onEvent::result = {} ", result, e);
+        }
+    }
+
+    @Override
+    public void completed(T result) {
+        sseEmitter.complete();
+    }
+
+    @Override
+    public void failed(Exception ex) {
+    }
+
+    @Override
+    public void cancelled() {
+        super.cancelled();
+    }
+
+    public SseEmitter getSseEmitter() {
+        return sseEmitter;
+    }
+
+    public void setSseEmitter(SseEmitter sseEmitter) {
+        this.sseEmitter = sseEmitter;
+    }
+
 
 }

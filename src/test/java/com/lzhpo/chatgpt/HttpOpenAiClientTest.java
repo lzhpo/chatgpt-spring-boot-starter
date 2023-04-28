@@ -21,6 +21,7 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Console;
 import com.luna.common.net.sse.Event;
+import com.luna.common.net.sse.SseResponse;
 import com.lzhpo.chatgpt.entity.audio.CreateAudioRequest;
 import com.lzhpo.chatgpt.entity.audio.CreateAudioResponse;
 import com.lzhpo.chatgpt.entity.billing.CreditGrantsResponse;
@@ -116,7 +117,7 @@ class HttpOpenAiClientTest {
         request.setTemperature(0);
 
         final CountDownLatch countDownLatch = new CountDownLatch(1);
-        CustomDownLatchEventFutureCallback futureCallback = new CustomDownLatchEventFutureCallback(countDownLatch);
+        CustomDownLatchEventFutureCallback<Event, SseResponse> futureCallback = new CustomDownLatchEventFutureCallback<>(countDownLatch);
         assertDoesNotThrow(() -> openAiService.streamCompletions(request, futureCallback));
         countDownLatch.await();
     }
@@ -167,7 +168,7 @@ class HttpOpenAiClientTest {
         request.setMessages(messages);
 
         final CountDownLatch countDownLatch = new CountDownLatch(5);
-        CustomDownLatchEventFutureCallback<Event> eventSourceListener = new CustomDownLatchEventFutureCallback<>(countDownLatch);
+        CustomDownLatchEventFutureCallback<Event, SseResponse> eventSourceListener = new CustomDownLatchEventFutureCallback<>(countDownLatch);
         assertDoesNotThrow(() -> openAiService.streamChatCompletions(request, eventSourceListener));
         countDownLatch.await();
     }

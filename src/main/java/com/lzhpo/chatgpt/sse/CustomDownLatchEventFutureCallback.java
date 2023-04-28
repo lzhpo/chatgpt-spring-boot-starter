@@ -1,7 +1,6 @@
 package com.lzhpo.chatgpt.sse;
 
 import com.alibaba.fastjson2.JSON;
-import com.luna.common.net.async.CustomAbstacktFutureCallback;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.Assert;
 
@@ -13,8 +12,7 @@ import java.util.concurrent.CountDownLatch;
  * @date 2023/4/23
  */
 @Slf4j
-public class CustomDownLatchEventFutureCallback<T> extends CustomAbstacktFutureCallback<T> implements Listener{
-
+public class CustomDownLatchEventFutureCallback<T, R> extends AbstractFutureCallback<T, R> implements Listener {
 
     private final CountDownLatch countDownLatch;
 
@@ -25,6 +23,7 @@ public class CustomDownLatchEventFutureCallback<T> extends CustomAbstacktFutureC
 
     @Override
     public void completed(T result) {
+        log.info("completed::result = {}", JSON.toJSONString(result));
         countDownLatch.countDown();
     }
 

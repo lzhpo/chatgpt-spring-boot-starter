@@ -20,14 +20,11 @@ import cn.hutool.core.lang.WeightRandom;
 import com.luna.common.date.DateUtils;
 import com.lzhpo.chatgpt.entity.chat.ChatCompletionRequest;
 import com.lzhpo.chatgpt.entity.chat.ChatCompletionResponse;
+import com.lzhpo.chatgpt.sse.CustomEventSourceListener;
+import com.lzhpo.chatgpt.sse.CustomSseFutureCallback;
 import com.lzhpo.chatgpt.sse.SseEventSourceListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.assertj.core.util.Lists;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.MediaType;
-import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
@@ -56,6 +53,7 @@ import java.util.stream.Stream;
 public class OpenAiTestController {
 
     private final DefaultOpenAiClient openAiClient;
+    private final HttpOpenAiClient  httpOpenAiClient;
     private final WeightRandom<String> apiKeyWeightRandom;
 
     @GetMapping("/page/chat")
@@ -90,10 +88,13 @@ public class OpenAiTestController {
         return sseEmitter;
     }
 
-    @GetMapping(path = "/sse/{userId}",produces = MediaType.TEXT_EVENT_STREAM_VALUE )
-    public Flux<ServerSentEvent<String>> sse(@PathVariable String userId) {
-        return Flux.interval(Duration.ofSeconds(1))
-                .map(sequence -> ServerSentEvent.<String>builder().event("1").data(String.valueOf(sequence)).build());
+    @ResponseBody
+    @GetMapping("/chat/http5/sse")
+    public SseEmitter sseStreamHttpChat(@RequestParam String message) {
+        SseEmitter sseEmitter = new SseEmitter();
+        ChatCompletionRequest request = ChatCompletionRequest.create(message);
+        httpOpenAiClient.streamChatCompletions(request, new CustomEventSourceListener<>(sseEmitter));
+        return sseEmitter;
     }
 
     @GetMapping("/stream-sse-mvc")

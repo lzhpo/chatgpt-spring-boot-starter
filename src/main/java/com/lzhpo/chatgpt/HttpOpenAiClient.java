@@ -1,15 +1,13 @@
 package com.lzhpo.chatgpt;
 
-import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.lang.WeightRandom;
-import com.alibaba.fastjson2.JSON;
 import com.google.common.collect.Maps;
 import com.luna.common.file.FileTools;
 import com.luna.common.net.HttpUtils;
 import com.luna.common.net.HttpUtilsConstant;
 import com.luna.common.net.async.CustomAbstacktFutureCallback;
-import com.luna.common.net.async.CustomAsyncHttpResponse;
 import com.luna.common.net.async.CustomSseAsyncConsumer;
+import com.luna.common.net.hander.AbstactEventFutureCallback;
 import com.luna.common.net.high.AsyncHttpUtils;
 import com.luna.common.net.sse.Event;
 import com.luna.common.net.sse.SseResponse;
@@ -42,22 +40,17 @@ import com.lzhpo.chatgpt.entity.moderations.ModerationResponse;
 import com.lzhpo.chatgpt.entity.users.UserResponse;
 import com.lzhpo.chatgpt.sse.*;
 import com.lzhpo.chatgpt.utils.JsonUtils;
-import lombok.Cleanup;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.internal.sse.RealEventSource;
-import okhttp3.sse.EventSourceListener;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.hc.client5.http.entity.mime.HttpMultipartMode;
 import org.apache.hc.client5.http.entity.mime.MultipartEntityBuilder;
 import org.apache.hc.client5.http.impl.classic.BasicHttpClientResponseHandler;
-import org.apache.hc.core5.concurrent.FutureCallback;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpHeaders;
-import org.apache.hc.core5.http.Method;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.nio.AsyncRequestProducer;
 import org.apache.hc.core5.http.nio.entity.StringAsyncEntityProducer;
@@ -70,9 +63,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.util.UriTemplateHandler;
 
-import java.io.File;
 import java.net.URI;
-import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
@@ -107,11 +98,9 @@ public class HttpOpenAiClient implements OpenAiClient {
     }
 
     @Override
-    public void streamCompletions(CompletionRequest request, Listener listener) {
-        URI uri = getUri(COMPLETIONS, request);
-//        doRequestAsync(uri, listener);
-
-        execute(COMPLETIONS, createRequestBody(request), CompletionResponse.class);
+    public void streamCompletions(CompletionRequest request, Listener eventListener) {
+        request.setStream(true);
+        doRequestAsync(CHAT_COMPLETIONS, JsonUtils.toJsonString(request), eventListener);
     }
 
     @Override
@@ -127,8 +116,7 @@ public class HttpOpenAiClient implements OpenAiClient {
     @Override
     public void streamChatCompletions(ChatCompletionRequest request, Listener eventListener) {
         request.setStream(true);
-        CustomAbstacktFutureCallback customAbstacktFutureCallback = new CustomDownLatchEventFutureCallback(new CountDownLatch(1));
-        doRequestAsync(CHAT_COMPLETIONS, JsonUtils.toJsonString(request), (CustomDownLatchEventFutureCallback<Event>) eventListener, customAbstacktFutureCallback);
+        doRequestAsync(CHAT_COMPLETIONS, JsonUtils.toJsonString(request), eventListener);
     }
 
     @Override
@@ -209,7 +197,7 @@ public class HttpOpenAiClient implements OpenAiClient {
 
     @Override
     public CreateAudioResponse createTranslation(Resource fileResource, CreateAudioRequest request) {
-        HttpEntity multipartBody  = createAudioBody(fileResource, request);
+        HttpEntity multipartBody = createAudioBody(fileResource, request);
         return execute(CREATE_TRANSLATION, multipartBody, CreateAudioResponse.class);
     }
 
@@ -274,7 +262,7 @@ public class HttpOpenAiClient implements OpenAiClient {
         return result;
     }
 
-    public void doRequestAsync(OpenAiUrl openAiUrl, String body, CustomAbstacktFutureCallback<Event> eventCallBack, CustomAbstacktFutureCallback<SseResponse> resultCallback) {
+    public  void doRequestAsync(OpenAiUrl openAiUrl, String body, Listener callback) {
         URI requestUri = getUri(openAiUrl);
         Map<String, String> header = Maps.newHashMap();
         header.put(HttpHeaders.AUTHORIZATION, BEARER.concat(apiKeyWeightRandom.next()));
@@ -282,10 +270,10 @@ public class HttpOpenAiClient implements OpenAiClient {
         StringAsyncEntityProducer bodyProducer = new StringAsyncEntityProducer(body);
         AsyncRequestProducer producer = AsyncHttpUtils.getProducer("http://localhost:6060", "/stream-sse-mvc", header, new HashMap<>(), bodyProducer, HttpMethod.GET.toString());
 
-        CustomEventSourceListener customEventSourceListener = new CustomEventSourceListener(eventCallBack, resultCallback);
         // 事件处理器
-        CustomSseAsyncConsumer customSseAsyncConsumer = new CustomSseAsyncConsumer(customEventSourceListener);
+        CustomSseAsyncConsumer customSseAsyncConsumer = new CustomSseAsyncConsumer((AbstactEventFutureCallback<SseResponse, Event>) callback);
         SseResponse sseResponse = AsyncHttpUtils.doAsyncRequest(producer, customSseAsyncConsumer, null);
+        System.out.println(sseResponse);
     }
 
     @NotNull
