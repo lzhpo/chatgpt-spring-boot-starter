@@ -30,7 +30,7 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
  * @author lzhpo
  */
 @Slf4j
-public class SseEventSourceListener extends LoggingEventSourceListener {
+public class SseEventSourceListener extends LoggingEventSourceListener implements Listener {
 
     private final SseEmitter sseEmitter;
 

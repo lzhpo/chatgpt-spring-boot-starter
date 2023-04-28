@@ -25,7 +25,7 @@ public class CustomDownLatchEventFutureCallback<T> extends CustomAbstacktFutureC
 
     @Override
     public void completed(T result) {
-        System.out.println(JSON.toJSONString(result));
+        countDownLatch.countDown();
     }
 
     @Override

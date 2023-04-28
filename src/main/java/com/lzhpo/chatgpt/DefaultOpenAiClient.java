@@ -111,10 +111,10 @@ public class DefaultOpenAiClient implements OpenAiClient {
     }
 
     @Override
-    public void streamChatCompletions(ChatCompletionRequest request, EventSourceListener listener) {
+    public void streamChatCompletions(ChatCompletionRequest request, Listener listener) {
         request.setStream(true);
         Request clientRequest = createRequest(CHAT_COMPLETIONS, createRequestBody(request));
-        RealEventSource realEventSource = new RealEventSource(clientRequest, listener);
+        RealEventSource realEventSource = new RealEventSource(clientRequest, (EventSourceListener) listener);
         realEventSource.connect(okHttpClient);
     }
 

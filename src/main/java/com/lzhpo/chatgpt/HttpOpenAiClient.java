@@ -7,8 +7,12 @@ import com.google.common.collect.Maps;
 import com.luna.common.file.FileTools;
 import com.luna.common.net.HttpUtils;
 import com.luna.common.net.HttpUtilsConstant;
+import com.luna.common.net.async.CustomAbstacktFutureCallback;
 import com.luna.common.net.async.CustomAsyncHttpResponse;
+import com.luna.common.net.async.CustomSseAsyncConsumer;
 import com.luna.common.net.high.AsyncHttpUtils;
+import com.luna.common.net.sse.Event;
+import com.luna.common.net.sse.SseResponse;
 import com.luna.common.text.CharsetUtil;
 import com.lzhpo.chatgpt.entity.audio.CreateAudioRequest;
 import com.lzhpo.chatgpt.entity.audio.CreateAudioResponse;
@@ -36,7 +40,7 @@ import com.lzhpo.chatgpt.entity.model.RetrieveModelResponse;
 import com.lzhpo.chatgpt.entity.moderations.ModerationRequest;
 import com.lzhpo.chatgpt.entity.moderations.ModerationResponse;
 import com.lzhpo.chatgpt.entity.users.UserResponse;
-import com.lzhpo.chatgpt.sse.Listener;
+import com.lzhpo.chatgpt.sse.*;
 import com.lzhpo.chatgpt.utils.JsonUtils;
 import lombok.Cleanup;
 import lombok.RequiredArgsConstructor;
@@ -53,8 +57,10 @@ import org.apache.hc.core5.concurrent.FutureCallback;
 import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.Method;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.apache.hc.core5.http.nio.AsyncRequestProducer;
+import org.apache.hc.core5.http.nio.entity.StringAsyncEntityProducer;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.boot.context.properties.PropertyMapper;
 import org.springframework.core.io.Resource;
@@ -70,6 +76,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 import static com.lzhpo.chatgpt.OpenAiConstant.BEARER;
 import static com.lzhpo.chatgpt.OpenAiUrl.*;
@@ -118,11 +125,10 @@ public class HttpOpenAiClient implements OpenAiClient {
     }
 
     @Override
-    public void streamChatCompletions(ChatCompletionRequest request, EventSourceListener listener) {
-//        request.setStream(true);
-//        Request clientRequest = createRequest(CHAT_COMPLETIONS, createRequestBody(request));
-//        RealEventSource realEventSource = new RealEventSource(clientRequest, listener);
-//        realEventSource.connect(okHttpClient);
+    public void streamChatCompletions(ChatCompletionRequest request, Listener eventListener) {
+        request.setStream(true);
+        CustomAbstacktFutureCallback customAbstacktFutureCallback = new CustomDownLatchEventFutureCallback(new CountDownLatch(1));
+        doRequestAsync(CHAT_COMPLETIONS, JsonUtils.toJsonString(request), (CustomDownLatchEventFutureCallback<Event>) eventListener, customAbstacktFutureCallback);
     }
 
     @Override
@@ -268,12 +274,18 @@ public class HttpOpenAiClient implements OpenAiClient {
         return result;
     }
 
-    public void doRequestAsync(URI requestUri, Listener listener) {
+    public void doRequestAsync(OpenAiUrl openAiUrl, String body, CustomAbstacktFutureCallback<Event> eventCallBack, CustomAbstacktFutureCallback<SseResponse> resultCallback) {
+        URI requestUri = getUri(openAiUrl);
         Map<String, String> header = Maps.newHashMap();
         header.put(HttpHeaders.AUTHORIZATION, BEARER.concat(apiKeyWeightRandom.next()));
-        AsyncRequestProducer producer = AsyncHttpUtils.getProducer(openAiProperties.getDomain(), requestUri.getPath(), header, new HashMap<>(), HttpMethod.POST.toString());
 
-        AsyncHttpUtils.doAsyncRequest(producer, (FutureCallback<CustomAsyncHttpResponse>) listener);
+        StringAsyncEntityProducer bodyProducer = new StringAsyncEntityProducer(body);
+        AsyncRequestProducer producer = AsyncHttpUtils.getProducer("http://localhost:6060", "/stream-sse-mvc", header, new HashMap<>(), bodyProducer, HttpMethod.GET.toString());
+
+        CustomEventSourceListener customEventSourceListener = new CustomEventSourceListener(eventCallBack, resultCallback);
+        // 事件处理器
+        CustomSseAsyncConsumer customSseAsyncConsumer = new CustomSseAsyncConsumer(customEventSourceListener);
+        SseResponse sseResponse = AsyncHttpUtils.doAsyncRequest(producer, customSseAsyncConsumer, null);
     }
 
     @NotNull

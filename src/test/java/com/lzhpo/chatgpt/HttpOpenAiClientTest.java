@@ -20,6 +20,7 @@ import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Console;
+import com.luna.common.net.sse.Event;
 import com.lzhpo.chatgpt.entity.audio.CreateAudioRequest;
 import com.lzhpo.chatgpt.entity.audio.CreateAudioResponse;
 import com.lzhpo.chatgpt.entity.billing.CreditGrantsResponse;
@@ -165,8 +166,8 @@ class HttpOpenAiClientTest {
         request.setModel("gpt-3.5-turbo");
         request.setMessages(messages);
 
-        final CountDownLatch countDownLatch = new CountDownLatch(1);
-        CountDownLatchEventSourceListener eventSourceListener = new CountDownLatchEventSourceListener(countDownLatch);
+        final CountDownLatch countDownLatch = new CountDownLatch(5);
+        CustomDownLatchEventFutureCallback<Event> eventSourceListener = new CustomDownLatchEventFutureCallback<>(countDownLatch);
         assertDoesNotThrow(() -> openAiService.streamChatCompletions(request, eventSourceListener));
         countDownLatch.await();
     }

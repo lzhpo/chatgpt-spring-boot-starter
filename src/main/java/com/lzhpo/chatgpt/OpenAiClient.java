@@ -101,7 +101,7 @@ public interface OpenAiClient {
      * @param request {@link ChatCompletionRequest}
      * @param listener {@link EventSourceListener}
      */
-    void streamChatCompletions(@Valid ChatCompletionRequest request, @NotNull EventSourceListener listener);
+    void streamChatCompletions(@Valid ChatCompletionRequest request, @NotNull Listener listener);
 
     /**
      * List models.
