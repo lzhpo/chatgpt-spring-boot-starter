@@ -28,11 +28,8 @@
 </div>
 
 <script th:src="@{/lib/layui/layui.js}"></script>
-<!-- https://cdn.jsdelivr.net/npm/event-source-polyfill@1.0.31/src/eventsource.min.js -->
-<script th:src="@{/lib/eventsource.min.js}"></script>
 <script th:src="@{/js/chat.js}"></script>
 <script>
-    // import { EventSourcePolyfill } from "../static/lib/eventsource";
     let CAN_STOP_FLAG = false;
 
     layui.use(['jquery', 'layer'], function() {
@@ -99,13 +96,7 @@
               </li>
             `);
 
-            // const eventSource = new EventSource(`http://127.0.0.1:6060/chat/sse?message=${content}`, {
-            const eventSource = new EventSourcePolyfill(`http://127.0.0.1:6060/chat/sse?message=${content}`, {
-                headers: {
-                    "name": "lzhpo",
-                    "requestBody": `{"age":100,"hobby":"basketball"}`
-                }
-            });
+            const eventSource = new EventSource(`http://127.0.0.1:6060/chat/sse?message=${content}`);
             eventSource.onopen = function(event) {
                 $stopButton.removeClass("layui-btn-disabled");
             }

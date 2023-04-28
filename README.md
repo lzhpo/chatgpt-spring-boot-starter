@@ -236,35 +236,9 @@ eventSource.onmessage = function(event) {
 }
 ```
 
-由于SSE协议只支持GET方法，不支持POST方法，如果我们想向后端发送body也有替代办法。
-
-方法1：把body编码之后放在请求参数上，参考JS函数：`encodeURI()`、`encodeURIComponent()`、`escape()`
-
-方法2：使用`EventSourcePolyfill`，把body放在header中，后端就可以直接从header中获取。
-![](./does/images/EventSource不支持POST的替代办法.png)
-```js
-const eventSource = new EventSourcePolyfill(`http://127.0.0.1:6060/chat/sse?message=${content}`, {
-    headers: {
-        "name": "lzhpo",
-        "requestBody": `{"age":100,"hobby":"basketball"}`
-    }
-});
-eventSource.onmessage = function(event) {
-    // 略...
-}
-```
-
-```shell
-# 以jsdelivr举例，也可直接下载到本地引入
-https://cdn.jsdelivr.net/npm/event-source-polyfill@1.0.31/src/eventsource.min.js
-```
-```shell
-# 也可以直接 npm install
-npm install event-source-polyfill
-```
+由于SSE协议只支持GET方法，不支持POST方法，如果要支持POST方法可以使用`fetch-event-source`：https://github.com/Azure/fetch-event-source
 
 详细代码见仓库目录下：
-- `static/lib/eventsource.js`
 - `templates/chat.html`
 - `templates/sse-stream-chat.html`
 - `com.lzhpo.chatgpt.OpenAiTestController`
