@@ -17,7 +17,6 @@
 package com.lzhpo.chatgpt.entity.chat;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.lzhpo.chatgpt.entity.CommonUsage;
 import lombok.Data;
 
 /**
@@ -32,6 +31,4 @@ public class ChatCompletionChoice {
 
     @JsonProperty("finish_reason")
     private String finishReason;
-
-    private CommonUsage usage;
 }

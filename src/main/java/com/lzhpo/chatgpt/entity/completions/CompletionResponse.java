@@ -16,6 +16,7 @@
 
 package com.lzhpo.chatgpt.entity.completions;
 
+import com.lzhpo.chatgpt.entity.CommonUsage;
 import java.util.List;
 import lombok.Data;
 
@@ -29,5 +30,6 @@ public class CompletionResponse {
     private String object;
     private Long created;
     private String model;
+    private CommonUsage usage;
     private List<CompletionChoice> choices;
 }
