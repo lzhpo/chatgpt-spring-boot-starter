@@ -1,5 +1,6 @@
 package com.lzhpo.chatgpt;
 
+import cn.hutool.core.io.file.FileNameUtil;
 import cn.hutool.core.lang.WeightRandom;
 import com.google.common.collect.Maps;
 import com.luna.common.file.FileTools;
@@ -63,12 +64,13 @@ import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.util.UriTemplateHandler;
 
+import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.lzhpo.chatgpt.OpenAiConstant.BEARER;
+import static com.lzhpo.chatgpt.OpenAiConstant.*;
 import static com.lzhpo.chatgpt.OpenAiUrl.*;
 
 /**
@@ -206,14 +208,20 @@ public class HttpOpenAiClient implements OpenAiClient {
     }
 
     @Override
+    @SneakyThrows
     public CreateImageResponse createImageEdit(Resource image, Resource mask, CreateImageRequest request) {
-        return null;
+        HttpEntity imageBody = createImageBody(image, mask, request);
+        return execute(CREATE_TRANSCRIPTION, imageBody, CreateImageResponse.class);
     }
 
     @Override
+    @SneakyThrows
     public CreateImageResponse createImageVariation(Resource image, CreateImageVariationRequest request) {
-        return null;
+
+        HttpEntity requestBody = buildImageFormBody(image, request);
+        return execute(CREATE_IMAGE_VARIATION, requestBody, CreateImageResponse.class);
     }
+
 
     @Override
     public CreditGrantsResponse billingCreditGrants() {
@@ -237,12 +245,17 @@ public class HttpOpenAiClient implements OpenAiClient {
 
     @SneakyThrows
     private <S> S execute(OpenAiUrl openAiUrl, HttpEntity requestBody, Class<S> responseType, Object... uriVariables) {
-        String request = doRequest(openAiUrl, requestBody, uriVariables);
+        return execute(openAiUrl, new HashMap<>(), requestBody, responseType, uriVariables);
+    }
+
+    @SneakyThrows
+    private <S> S execute(OpenAiUrl openAiUrl, Map<String, String> body, HttpEntity requestBody, Class<S> responseType, Object... uriVariables) {
+        String request = doRequest(openAiUrl, body, requestBody, uriVariables);
         Assert.notNull(request, "Resolve response body failed.");
         return JsonUtils.parse(request, responseType);
     }
 
-    private String doRequest(OpenAiUrl openAiUrl, HttpEntity httpEntity, Object... uriVariables) {
+    private String doRequest(OpenAiUrl openAiUrl, Map<String, String> body, HttpEntity httpEntity, Object... uriVariables) {
         WeightRandom<String> weightRandom = openAiKeyWrapper.wrap();
         Map<OpenAiUrl, String> configUrls = openAiProperties.getUrls();
 
@@ -254,9 +267,9 @@ public class HttpOpenAiClient implements OpenAiClient {
         String result;
         if (HttpMethod.POST.toString().equals(openAiUrl.getMethod())) {
             header.put(HttpHeaders.CONTENT_TYPE, HttpUtilsConstant.JSON);
-            result = HttpUtils.doPost(openAiProperties.getDomain(), requestUri.getPath(), header, new HashMap<>(), httpEntity, new BasicHttpClientResponseHandler());
+            result = HttpUtils.doPost(openAiProperties.getDomain(), requestUri.getPath(), header, body, httpEntity, new BasicHttpClientResponseHandler());
         } else if (HttpMethod.GET.toString().equals(openAiUrl.getMethod())) {
-            result = HttpUtils.doGet(openAiProperties.getDomain(), requestUri.getPath(), header, new HashMap<>(), new BasicHttpClientResponseHandler());
+            result = HttpUtils.doGet(openAiProperties.getDomain(), requestUri.getPath(), header, body, new BasicHttpClientResponseHandler());
         } else {
             throw new OpenAiException("不支持的请求方式");
         }
@@ -313,19 +326,51 @@ public class HttpOpenAiClient implements OpenAiClient {
     }
 
     @SneakyThrows
-    private HttpEntity createAudioBody(Resource fileResource, CreateAudioRequest request) {
-        MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-        builder.setMode(HttpMultipartMode.LEGACY);
-        builder.setCharset(CharsetUtil.defaultCharset());
-        builder.setContentType(ContentType.MULTIPART_FORM_DATA);
+    private HttpEntity createImageBody(Resource image, Resource mask, CreateImageRequest request) {
+        boolean imageIsPng = FileNameUtil.isType(image.getFilename(), EXPECTED_IMAGE_TYPE);
+        boolean maskIsPng = FileNameUtil.isType(mask.getFilename(), EXPECTED_IMAGE_TYPE);
+        Assert.isTrue(imageIsPng, "The image must png type.");
+        Assert.isTrue(maskIsPng, "The mask must png type.");
+
+        Assert.isTrue(image.contentLength() < MAX_IMAGE_SIZE, "The image must less than 4MB.");
+        Assert.isTrue(mask.contentLength() < MAX_IMAGE_SIZE, "The mask must less than 4MB.");
+        PropertyMapper mapper = PropertyMapper.get().alwaysApplyingWhenNonNull();
         HashMap<String, String> map = Maps.newHashMap();
-        builder.addBinaryBody("file", fileResource.getInputStream());
+
+        map.put("image", image.getFile().getAbsolutePath());
+        map.put("mask", mask.getFile().getAbsolutePath());
+        mapper.from(request.getPrompt()).to(prompt -> map.put("prompt", prompt));
+        return createRequestBody(map);
+    }
+
+    @NotNull
+    private HttpEntity buildImageFormBody(Resource image, CreateImageVariationRequest request) throws IOException {
+        boolean imageIsPng = FileNameUtil.isType(image.getFilename(), EXPECTED_IMAGE_TYPE);
+        Assert.isTrue(imageIsPng, "The image must png type.");
+        Assert.isTrue(image.contentLength() < MAX_IMAGE_SIZE, "The image must less than 4MB.");
+
+        HashMap<String, String> hashMap = Maps.newHashMap();
+        PropertyMapper mapper = PropertyMapper.get().alwaysApplyingWhenNonNull();
+        mapper.from(request.getN()).to(n -> hashMap.put("n", n.toString()));
+        mapper.from(request.getSize()).to(size -> hashMap.put("size", size.getValue()));
+        mapper.from(request.getResponseFormat()).to(obj -> hashMap.put("response_format", obj.getValue()));
+        mapper.from(request.getUser()).to(user -> hashMap.put("user", user));
+        hashMap.put("images", image.getFile().getAbsolutePath());
+        return createRequestBody(hashMap);
+    }
+
+    @SneakyThrows
+    private HttpEntity createAudioBody(Resource fileResource, CreateAudioRequest request) {
+
+        HashMap<String, String> map = Maps.newHashMap();
+        map.put("file", fileResource.getFile().getAbsolutePath());
         PropertyMapper mapper = PropertyMapper.get().alwaysApplyingWhenNonNull();
         mapper.from(request.getModel()).to(model -> map.put("model", model));
         mapper.from(request.getPrompt()).to(prompt -> map.put("prompt", prompt));
         mapper.from(request.getResponseFormat()).to(format -> map.put("response_format", format));
         mapper.from(request.getTemperature()).to(obj -> map.put("temperature", obj.toString()));
         mapper.from(request.getLanguage()).to(language -> map.put("language", language));
-        return builder.build();
+
+        return createRequestBody(map);
     }
 }
