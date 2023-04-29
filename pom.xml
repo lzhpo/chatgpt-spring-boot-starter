@@ -49,8 +49,32 @@
         <flatten-maven-plugin>1.2.7</flatten-maven-plugin>
         <hutool.version>5.8.18</hutool.version>
         <okhttp.version>4.10.0</okhttp.version>
+        <luna-common.version>2.4.4</luna-common.version>
+        <httpclient5.version>5.2.1</httpclient5.version>
         <jtokkit.version>0.4.0</jtokkit.version>
     </properties>
+
+    <dependencyManagement>
+
+        <dependencies>
+            <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents.client5/httpclient5 -->
+            <dependency>
+                <groupId>org.apache.httpcomponents.client5</groupId>
+                <artifactId>httpclient5</artifactId>
+                <version>5.2.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents.core5</groupId>
+                <artifactId>httpcore5</artifactId>
+                <version>5.2.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents.core5</groupId>
+                <artifactId>httpcore5-h2</artifactId>
+                <version>5.2.1</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <dependency>
@@ -108,6 +132,12 @@
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>okhttp-sse</artifactId>
             <version>${okhttp.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.github.lunasaw</groupId>
+            <artifactId>luna-common</artifactId>
+            <version>${luna-common.version}</version>
         </dependency>
 
         <dependency>

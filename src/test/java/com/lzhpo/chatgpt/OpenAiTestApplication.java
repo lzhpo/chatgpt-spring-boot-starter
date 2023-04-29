@@ -35,4 +35,5 @@ public class OpenAiTestApplication {
     public ServerEndpointExporter serverEndpointExporter() {
         return new ServerEndpointExporter();
     }
+
 }
