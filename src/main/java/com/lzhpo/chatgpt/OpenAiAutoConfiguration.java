@@ -3,6 +3,7 @@ package com.lzhpo.chatgpt;
 import cn.hutool.core.util.StrUtil;
 import com.lzhpo.chatgpt.apikey.OpenAiKeyProvider;
 import com.lzhpo.chatgpt.apikey.OpenAiKeyWrapper;
+import com.lzhpo.chatgpt.exception.OpenAiErrorInterceptor;
 import com.lzhpo.chatgpt.properties.OpenAiProperties;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -78,5 +79,10 @@ public class OpenAiAutoConfiguration {
     @ConditionalOnMissingBean
     public OpenAiKeyProvider openAiKeyProvider() {
         return openAiProperties::getKeys;
+    }
+
+    @Bean
+    public OpenAiErrorInterceptor openAiErrorInterceptor(OpenAiKeyWrapper openAiKeyWrapper) {
+        return new OpenAiErrorInterceptor(openAiKeyWrapper);
     }
 }

@@ -17,14 +17,11 @@
 package com.lzhpo.chatgpt;
 
 import static com.lzhpo.chatgpt.OpenAiConstant.*;
-import static com.lzhpo.chatgpt.exception.OpenAiErrorCode.ROTATION_ERROR_TYPES_OR_CODES;
-import static com.lzhpo.chatgpt.exception.OpenAiErrorCode.ROTATION_HTTP_CODES;
 import static com.lzhpo.chatgpt.properties.OpenAiUrl.*;
 
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.file.FileNameUtil;
 import cn.hutool.core.lang.WeightRandom;
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.http.Header;
 import com.lzhpo.chatgpt.apikey.OpenAiKeyWrapper;
@@ -62,7 +59,6 @@ import java.net.URI;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import lombok.Cleanup;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -277,35 +273,18 @@ public class DefaultOpenAiClient implements OpenAiClient {
         Request clientRequest = createRequest(openAiUrl, requestBody, uriVariables);
         @Cleanup Response response = okHttpClient.newCall(clientRequest).execute();
 
-        ResponseBody body = response.body();
-        Assert.notNull(body, "Resolve response body failed.");
-        String responseBody = body.string();
+        ResponseBody responseBody = response.body();
+        Assert.notNull(responseBody, "Resolve response responseBody failed.");
+        String responseBodyStr = responseBody.string();
 
         int code = response.code();
         Assert.isTrue(code >= 200 && code < 300, () -> {
             log.error("Response code: {}", code);
             log.error("Request message: {}", clientRequest);
-
-            String authorization = clientRequest.header(Header.AUTHORIZATION.name());
-            String apiKey = StrUtil.replace(authorization, BEARER, StrUtil.EMPTY);
-            if (ROTATION_HTTP_CODES.contains(code) && StringUtils.hasText(apiKey)) {
-                OpenAiError openAiError = JsonUtils.parse(responseBody, OpenAiError.class);
-                Optional.ofNullable(openAiError)
-                        .map(OpenAiError::getError)
-                        .filter(openAiErrorDetail -> {
-                            String errorType = openAiErrorDetail.getType();
-                            String errorCode = openAiErrorDetail.getCode();
-                            return ROTATION_ERROR_TYPES_OR_CODES.contains(errorType)
-                                    || ROTATION_ERROR_TYPES_OR_CODES.contains(errorCode);
-                        })
-                        .ifPresent(errorCode -> openAiKeyWrapper.invalidKey(apiKey));
-                SpringUtil.publishEvent(new InvalidedKeyEvent(this, apiKey, responseBody));
-            }
-
-            throw new OpenAiException(responseBody);
+            throw new OpenAiException(responseBodyStr);
         });
 
-        return JsonUtils.parse(responseBody, responseType);
+        return JsonUtils.parse(responseBodyStr, responseType);
     }
 
     private Request createRequest(OpenAiUrl openAiUrl, RequestBody requestBody, Object... uriVariables) {
