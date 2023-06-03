@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.lzhpo.chatgpt;
+package com.lzhpo.chatgpt.properties;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

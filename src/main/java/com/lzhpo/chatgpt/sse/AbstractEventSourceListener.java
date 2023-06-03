@@ -16,7 +16,7 @@
 
 package com.lzhpo.chatgpt.sse;
 
-import com.lzhpo.chatgpt.OpenAiException;
+import com.lzhpo.chatgpt.exception.OpenAiException;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;

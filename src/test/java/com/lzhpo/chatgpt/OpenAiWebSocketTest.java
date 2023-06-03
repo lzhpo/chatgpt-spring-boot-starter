@@ -18,6 +18,7 @@ package com.lzhpo.chatgpt;
 
 import cn.hutool.extra.spring.SpringUtil;
 import com.lzhpo.chatgpt.entity.chat.ChatCompletionRequest;
+import com.lzhpo.chatgpt.exception.OpenAiException;
 import com.lzhpo.chatgpt.sse.WebSocketEventSourceListener;
 import javax.websocket.*;
 import javax.websocket.server.ServerEndpoint;

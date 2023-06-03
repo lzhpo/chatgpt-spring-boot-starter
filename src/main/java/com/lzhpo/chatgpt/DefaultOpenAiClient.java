@@ -17,12 +17,17 @@
 package com.lzhpo.chatgpt;
 
 import static com.lzhpo.chatgpt.OpenAiConstant.*;
-import static com.lzhpo.chatgpt.OpenAiUrl.*;
+import static com.lzhpo.chatgpt.exception.OpenAiErrorCode.ROTATION_ERROR_TYPES_OR_CODES;
+import static com.lzhpo.chatgpt.exception.OpenAiErrorCode.ROTATION_HTTP_CODES;
+import static com.lzhpo.chatgpt.properties.OpenAiUrl.*;
 
 import cn.hutool.core.io.IoUtil;
 import cn.hutool.core.io.file.FileNameUtil;
 import cn.hutool.core.lang.WeightRandom;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.http.Header;
+import com.lzhpo.chatgpt.apikey.OpenAiKeyWrapper;
 import com.lzhpo.chatgpt.entity.audio.CreateAudioRequest;
 import com.lzhpo.chatgpt.entity.audio.CreateAudioResponse;
 import com.lzhpo.chatgpt.entity.billing.CreditGrantsResponse;
@@ -49,10 +54,15 @@ import com.lzhpo.chatgpt.entity.model.RetrieveModelResponse;
 import com.lzhpo.chatgpt.entity.moderations.ModerationRequest;
 import com.lzhpo.chatgpt.entity.moderations.ModerationResponse;
 import com.lzhpo.chatgpt.entity.users.UserResponse;
+import com.lzhpo.chatgpt.exception.*;
+import com.lzhpo.chatgpt.properties.OpenAiProperties;
+import com.lzhpo.chatgpt.properties.OpenAiUrl;
 import com.lzhpo.chatgpt.utils.JsonUtils;
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import lombok.Cleanup;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -62,7 +72,6 @@ import okhttp3.internal.sse.RealEventSource;
 import okhttp3.sse.EventSourceListener;
 import org.springframework.boot.context.properties.PropertyMapper;
 import org.springframework.core.io.Resource;
-import org.springframework.http.HttpStatus;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
@@ -74,12 +83,13 @@ import org.springframework.web.util.UriTemplateHandler;
 @Slf4j
 @Validated
 @RequiredArgsConstructor
+@SuppressWarnings({"squid:S6539"})
 public class DefaultOpenAiClient implements OpenAiClient {
 
     private final OkHttpClient okHttpClient;
     private final OpenAiProperties openAiProperties;
-    private final UriTemplateHandler uriTemplateHandler;
     private final OpenAiKeyWrapper openAiKeyWrapper;
+    private final UriTemplateHandler uriTemplateHandler;
 
     @Override
     public ModerationResponse moderations(ModerationRequest request) {
@@ -272,17 +282,26 @@ public class DefaultOpenAiClient implements OpenAiClient {
         String responseBody = body.string();
 
         int code = response.code();
-        HttpStatus httpStatus = HttpStatus.resolve(code);
-
-        Assert.notNull(httpStatus, () -> {
-            log.error("Unknown http status code: {}", code);
-            log.error("Request message: {}", clientRequest);
-            throw new OpenAiException(responseBody);
-        });
-
-        Assert.isTrue(httpStatus.is2xxSuccessful(), () -> {
+        Assert.isTrue(code >= 200 && code < 300, () -> {
             log.error("Response code: {}", code);
             log.error("Request message: {}", clientRequest);
+
+            String authorization = clientRequest.header(Header.AUTHORIZATION.name());
+            String apiKey = StrUtil.replace(authorization, BEARER, StrUtil.EMPTY);
+            if (ROTATION_HTTP_CODES.contains(code) && StringUtils.hasText(apiKey)) {
+                OpenAiError openAiError = JsonUtils.parse(responseBody, OpenAiError.class);
+                Optional.ofNullable(openAiError)
+                        .map(OpenAiError::getError)
+                        .filter(openAiErrorDetail -> {
+                            String errorType = openAiErrorDetail.getType();
+                            String errorCode = openAiErrorDetail.getCode();
+                            return ROTATION_ERROR_TYPES_OR_CODES.contains(errorType)
+                                    || ROTATION_ERROR_TYPES_OR_CODES.contains(errorCode);
+                        })
+                        .ifPresent(errorCode -> openAiKeyWrapper.invalidKey(apiKey));
+                SpringUtil.publishEvent(new InvalidedKeyEvent(this, apiKey, responseBody));
+            }
+
             throw new OpenAiException(responseBody);
         });
 
@@ -291,15 +310,23 @@ public class DefaultOpenAiClient implements OpenAiClient {
 
     private Request createRequest(OpenAiUrl openAiUrl, RequestBody requestBody, Object... uriVariables) {
         WeightRandom<String> weightRandom = openAiKeyWrapper.wrap();
+        String apiKey = weightRandom.next();
+        if (!StringUtils.hasText(apiKey)) {
+            List<String> invalidedKeys = openAiKeyWrapper.getInvalidKeys();
+            SpringUtil.publishEvent(new NoAvailableKeyEvent(this, invalidedKeys));
+            throw new OpenAiException("No available api key.");
+        }
+
         Map<OpenAiUrl, String> configUrls = openAiProperties.getUrls();
         String requestUrl = configUrls.get(openAiUrl);
         if (!StringUtils.hasText(requestUrl)) {
             requestUrl = openAiProperties.getDomain() + openAiUrl.getSuffix();
         }
         URI requestURI = uriTemplateHandler.expand(requestUrl, uriVariables);
+
         return new Request.Builder()
                 .url(Objects.requireNonNull(HttpUrl.get(requestURI)))
-                .header(Header.AUTHORIZATION.name(), BEARER.concat(weightRandom.next()))
+                .header(Header.AUTHORIZATION.name(), BEARER.concat(apiKey))
                 .method(openAiUrl.getMethod(), requestBody)
                 .build();
     }

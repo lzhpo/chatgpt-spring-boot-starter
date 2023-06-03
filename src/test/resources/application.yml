@@ -13,10 +13,7 @@ openai:
     - key: "sk-xxx2"
       weight: 2.0
       enabled: true
-    - key: "sk-xxx"
-      weight: 3.0
-      enabled: true
-    - key: "sk-xxx"
+    - key: "sk-xxx3"
       weight: 3.0
       enabled: true
 #  domain: "https://api.openai.com"

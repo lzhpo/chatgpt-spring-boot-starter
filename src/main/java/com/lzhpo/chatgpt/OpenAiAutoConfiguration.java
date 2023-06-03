@@ -1,6 +1,9 @@
 package com.lzhpo.chatgpt;
 
 import cn.hutool.core.util.StrUtil;
+import com.lzhpo.chatgpt.apikey.OpenAiKeyProvider;
+import com.lzhpo.chatgpt.apikey.OpenAiKeyWrapper;
+import com.lzhpo.chatgpt.properties.OpenAiProperties;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.List;
@@ -56,12 +59,13 @@ public class OpenAiAutoConfiguration {
             OkHttpClient okHttpClient,
             OpenAiKeyWrapper openAiKeyWrapper,
             ObjectProvider<UriTemplateHandler> uriTemplateHandlerObjectProvider) {
-        UriTemplateHandler uriTemplateHandler = uriTemplateHandlerObjectProvider.getIfAvailable(() -> {
+
+        UriTemplateHandler uriTplHandler = uriTemplateHandlerObjectProvider.getIfAvailable(() -> {
             DefaultUriBuilderFactory uriBuilderFactory = new DefaultUriBuilderFactory();
             uriBuilderFactory.setEncodingMode(DefaultUriBuilderFactory.EncodingMode.URI_COMPONENT);
             return uriBuilderFactory;
         });
-        return new DefaultOpenAiClient(okHttpClient, openAiProperties, uriTemplateHandler, openAiKeyWrapper);
+        return new DefaultOpenAiClient(okHttpClient, openAiProperties, openAiKeyWrapper, uriTplHandler);
     }
 
     @Bean

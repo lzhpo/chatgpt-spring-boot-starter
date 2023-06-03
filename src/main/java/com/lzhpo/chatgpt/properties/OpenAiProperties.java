@@ -14,8 +14,9 @@
  * limitations under the License.
  */
 
-package com.lzhpo.chatgpt;
+package com.lzhpo.chatgpt.properties;
 
+import com.lzhpo.chatgpt.apikey.OpenAiKey;
 import java.time.Duration;
 import java.util.*;
 import lombok.Data;

@@ -14,44 +14,35 @@
  * limitations under the License.
  */
 
-package com.lzhpo.chatgpt;
+package com.lzhpo.chatgpt.apikey;
 
-import java.net.Proxy;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * @author lzhpo
  */
 @Data
-public class OpenAiProxy {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class OpenAiKey {
 
     /**
-     * The proxy host.
+     * This api key.
      */
-    private String host;
+    private String key;
 
     /**
-     * The proxy port.
+     * This api key weight.
      */
-    private int port;
+    private double weight;
 
     /**
-     * The proxy type.
+     * Whether enable this api key.
      */
-    private Proxy.Type type;
-
-    /**
-     * The username.
-     */
-    private String username;
-
-    /**
-     * The password.
-     */
-    private String password;
-
-    /**
-     * The header name to provide to proxy server.
-     */
-    private String headerName = "Proxy-Authorization";
+    @Builder.Default
+    private boolean enabled = true;
 }

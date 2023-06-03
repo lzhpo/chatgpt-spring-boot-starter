@@ -14,21 +14,23 @@
  * limitations under the License.
  */
 
-package com.lzhpo.chatgpt;
+package com.lzhpo.chatgpt.exception;
 
-import java.util.List;
+import lombok.Getter;
+import org.springframework.context.ApplicationEvent;
 
 /**
  * @author lzhpo
  */
-public interface OpenAiKeyProvider {
+@Getter
+public class InvalidedKeyEvent extends ApplicationEvent {
 
-    /**
-     * Get the {@link OpenAiKey}.
-     *
-     * <p>Notes: if you get the api keys from DB, also can add cache to improve speed.
-     *
-     * @return list of {@link OpenAiKey}
-     */
-    List<OpenAiKey> get();
+    private final String invalidedApiKey;
+    private final String errorResponse;
+
+    public InvalidedKeyEvent(Object source, String invalidedApiKey, String errorResponse) {
+        super(source);
+        this.invalidedApiKey = invalidedApiKey;
+        this.errorResponse = errorResponse;
+    }
 }

@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package com.lzhpo.chatgpt;
+package com.lzhpo.chatgpt.exception;
+
+import lombok.Data;
 
 /**
+ * The OpenAI response error detail.
+ *
  * @author lzhpo
  */
-public class OpenAiException extends RuntimeException {
+@Data
+public class OpenAiErrorDetail {
 
-    public OpenAiException(String message) {
-        super(message);
-    }
-
-    public OpenAiException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public OpenAiException(Throwable cause) {
-        super(cause);
-    }
+    private String message;
+    private String type;
+    private String param;
+    private String code;
 }

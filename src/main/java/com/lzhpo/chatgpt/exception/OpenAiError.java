@@ -14,35 +14,18 @@
  * limitations under the License.
  */
 
-package com.lzhpo.chatgpt;
+package com.lzhpo.chatgpt.exception;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 /**
+ * Define the OpenAI response error.
+ * <p>Reference: <a href="https://platform.openai.com/docs/guides/error-codes/python-library-error-types">error-codes</a>
+ *
  * @author lzhpo
  */
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-public class OpenAiKey {
+public class OpenAiError {
 
-    /**
-     * This api key.
-     */
-    private String key;
-
-    /**
-     * This api key weight.
-     */
-    private double weight;
-
-    /**
-     * Whether enable this api key.
-     */
-    @Builder.Default
-    private boolean enabled = true;
+    private OpenAiErrorDetail error;
 }

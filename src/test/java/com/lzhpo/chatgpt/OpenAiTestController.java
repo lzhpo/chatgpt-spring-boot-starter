@@ -16,6 +16,7 @@
 
 package com.lzhpo.chatgpt;
 
+import com.lzhpo.chatgpt.apikey.OpenAiKeyWrapper;
 import com.lzhpo.chatgpt.entity.chat.ChatCompletionRequest;
 import com.lzhpo.chatgpt.entity.chat.ChatCompletionResponse;
 import com.lzhpo.chatgpt.sse.SseEventSourceListener;

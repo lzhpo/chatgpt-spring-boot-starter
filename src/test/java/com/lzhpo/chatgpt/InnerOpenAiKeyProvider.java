@@ -16,6 +16,8 @@
 
 package com.lzhpo.chatgpt;
 
+import com.lzhpo.chatgpt.apikey.OpenAiKey;
+import com.lzhpo.chatgpt.apikey.OpenAiKeyProvider;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

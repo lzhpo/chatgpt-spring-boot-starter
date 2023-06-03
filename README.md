@@ -5,7 +5,7 @@
 
 ## 概览
 
-1. 支持设置多个 API Key，并且支持对其设置权重，以及是否启用
+1. 支持设置多个 API Key，并且支持对其设置权重以及是否启用，支持自动禁用失效的 API Key 以及自动轮转
 2. 支持设置请求代理
 3. 支持自定义请求 API（如果对 OpenAi 的 API 做了中转/代理）
 4. 支持OpenAi所有可以使用 API Key 访问的 API
@@ -64,6 +64,8 @@ openai:
       weight: 3.0
       enabled: false
 ```
+
+_支持自动禁用失效的 API Key 以及自动轮转，参考：`InvalidedKeyEvent`、`NoAvailableKeyEvent`、`OpenAiEventListener`_
 
 #### 1.2 方式2-自定义获取 API Key 逻辑
 
@@ -188,9 +190,28 @@ OpenAi返回的token计算结果可在response返回体中获取：
 
 ### 6. 关于异常处理
 
-常规、SSE以及WebSocket请求失败均会抛出`OpenAiException`异常。
-
-如果需要自定义流式处理的EventSourceListener，推荐继承`AbstractEventSourceListener`，如果没有特殊需求，直接重写`onEvent`方法即可，如果重写了`onFailure`方法，抛出何种异常取决于重写的`onFailure`方法。
+1. 常规、SSE以及WebSocket请求失败均会抛出`OpenAiException`异常，可自定义全局异常，取出OpenAi的响应结果转换为`OpenAiError`(如果转换结果`OpenAiError`不为空)，继而自行处理。
+2. 自定义流式处理的`EventSourceListener`，推荐继承`AbstractEventSourceListener`，如果没有特殊需求，直接重写`onEvent`方法即可，如果重写了`onFailure`方法，抛出何种异常取决于重写的`onFailure`方法。
+3. 提供了失效的Api-Key事件、当前无可用的Api-Key事件，可自行监听处理，例如：
+    ```java
+    @Slf4j
+    @Component
+    public class OpenAiEventListener {
+    
+       @EventListener
+       public void processInvalidedKey(InvalidedKeyEvent event) {
+           String invalidedApiKey = event.getInvalidedApiKey();
+           String errorResponse = event.getErrorResponse();
+           log.error("Processing invalidedApiKey={} event, errorResponse: {}", invalidedApiKey, errorResponse);
+       }
+    
+       @EventListener
+       public void processNoAvailableKey(NoAvailableKeyEvent event) {
+           List<String> invalidedKeys = event.getInvalidedKeys();
+           log.error("Processing noAvailableKey event, invalidedKeys={}", invalidedKeys);
+       }
+    }
+    ```
 
 ## 代码示例
 
