@@ -26,7 +26,7 @@ import cn.hutool.http.Header;
 import com.lzhpo.chatgpt.apikey.OpenAiKeyWrapper;
 import com.lzhpo.chatgpt.utils.JsonUtils;
 import java.io.IOException;
-import java.util.Objects;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -34,6 +34,9 @@ import okhttp3.Interceptor;
 import okhttp3.Request;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
+import okio.Buffer;
+import okio.BufferedSource;
+import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 
 /**
@@ -50,12 +53,17 @@ public class OpenAiErrorInterceptor implements Interceptor {
         Request request = chain.request();
         Response response = chain.proceed(request);
         int code = response.code();
-        ResponseBody responseBody = Objects.requireNonNull(response.body(), "Resolve response body failed.");
-        String responseBodyStr = responseBody.string();
-
         String authorization = request.header(Header.AUTHORIZATION.name());
         String apiKey = StrUtil.replace(authorization, BEARER, StrUtil.EMPTY);
+
         if (ROTATION_HTTP_CODES.contains(code) && StringUtils.hasText(apiKey)) {
+            ResponseBody responseBody = response.body();
+            Assert.notNull(responseBody, "Resolve response body failed.");
+            BufferedSource responseBodySource = responseBody.source();
+            responseBodySource.request(Long.MAX_VALUE);
+            Buffer responseBodyBuffer = responseBodySource.getBuffer();
+            String responseBodyStr = responseBodyBuffer.clone().readString(StandardCharsets.UTF_8);
+
             OpenAiError openAiError = JsonUtils.parse(responseBodyStr, OpenAiError.class);
             Optional.ofNullable(openAiError)
                     .map(OpenAiError::getError)

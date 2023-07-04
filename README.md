@@ -212,6 +212,7 @@ OpenAi返回的token计算结果可在response返回体中获取：
        }
     }
     ```
+4. 也可以实现OKHttp的`Interceptor`接口，并声明为Bean，也可在里面自行处理异常，参考：`OpenAiErrorInterceptor`
 
 ## 代码示例
 
