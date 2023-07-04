@@ -17,12 +17,14 @@
 package com.lzhpo.chatgpt.sse;
 
 import com.lzhpo.chatgpt.exception.OpenAiException;
-import java.util.Objects;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Response;
+import okhttp3.ResponseBody;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSourceListener;
+import okio.BufferedSource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -50,8 +52,20 @@ public class AbstractEventSourceListener extends EventSourceListener {
     public void onFailure(@NotNull EventSource eventSource, @Nullable Throwable e, @Nullable Response response) {
         String errorMsg = Optional.ofNullable(e)
                 .map(Throwable::getMessage)
-                .orElseGet(() -> Objects.nonNull(response) ? response.toString() : "Unexpected exception");
-        log.error("Execute onFailure method, response: {}, error: {}", response, errorMsg);
+                .orElse(Optional.ofNullable(response)
+                        .map(Response::body)
+                        .map(ResponseBody::source)
+                        .map(bufferedSource -> {
+                            try {
+                                bufferedSource.request(Long.MAX_VALUE);
+                            } catch (Exception ex) {
+                                throw new OpenAiException(ex);
+                            }
+                            return bufferedSource;
+                        })
+                        .map(BufferedSource::getBuffer)
+                        .map(buffer -> buffer.clone().readString(StandardCharsets.UTF_8))
+                        .orElse("Unexpected exception"));
         throw new OpenAiException(errorMsg);
     }
 
