@@ -20,8 +20,6 @@ import java.util.concurrent.CountDownLatch;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Response;
 import okhttp3.sse.EventSource;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -40,14 +38,14 @@ public class CountDownLatchEventSourceListener extends AbstractEventSourceListen
     }
 
     @Override
-    public void onClosed(@NotNull EventSource eventSource) {
+    public void onClosed(EventSource eventSource) {
         super.onClosed(eventSource);
         eventSource.cancel();
         countDownLatch.countDown();
     }
 
     @Override
-    public void onFailure(@NotNull EventSource eventSource, @Nullable Throwable e, @Nullable Response response) {
+    public void onFailure(EventSource eventSource, Throwable e, Response response) {
         eventSource.cancel();
         countDownLatch.countDown();
         super.onFailure(eventSource, e, response);

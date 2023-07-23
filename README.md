@@ -330,9 +330,8 @@ websocket.onmessage = function(event) {
 @Slf4j
 public class OpenAiLoggingInterceptor implements Interceptor {
 
-    @NotNull
     @Override
-    public Response intercept(@NotNull Chain chain) throws IOException {
+    public Response intercept(Chain chain) throws IOException {
         Request request = chain.request();
         log.info("Request url: {} {}", request.method(), request.url());
         log.info("Request header: {}", request.headers());

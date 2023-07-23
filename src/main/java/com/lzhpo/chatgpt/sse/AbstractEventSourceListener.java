@@ -25,8 +25,6 @@ import okhttp3.ResponseBody;
 import okhttp3.sse.EventSource;
 import okhttp3.sse.EventSourceListener;
 import okio.BufferedSource;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * Abstract listener for <a href="https://www.w3.org/TR/eventsource/">Server-Sent Events</a>.
@@ -37,19 +35,18 @@ import org.jetbrains.annotations.Nullable;
 public class AbstractEventSourceListener extends EventSourceListener {
 
     @Override
-    public void onClosed(@NotNull EventSource eventSource) {
+    public void onClosed(EventSource eventSource) {
         log.debug("Execute onClosed method.");
     }
 
     @Override
-    public void onEvent(
-            @NotNull EventSource eventSource, @Nullable String id, @Nullable String type, @NotNull String data) {
+    public void onEvent(EventSource eventSource, String id, String type, String data) {
         log.debug("Execute onEvent method.");
         log.debug("id: {}, type: {}, data: {}", id, type, data);
     }
 
     @Override
-    public void onFailure(@NotNull EventSource eventSource, @Nullable Throwable e, @Nullable Response response) {
+    public void onFailure(EventSource eventSource, Throwable e, Response response) {
         String errorMsg = Optional.ofNullable(e)
                 .map(Throwable::getMessage)
                 .orElse(Optional.ofNullable(response)
@@ -70,7 +67,7 @@ public class AbstractEventSourceListener extends EventSourceListener {
     }
 
     @Override
-    public void onOpen(@NotNull EventSource eventSource, @NotNull Response response) {
+    public void onOpen(EventSource eventSource, Response response) {
         log.debug("Execute onOpen method, response: {}", response);
     }
 }

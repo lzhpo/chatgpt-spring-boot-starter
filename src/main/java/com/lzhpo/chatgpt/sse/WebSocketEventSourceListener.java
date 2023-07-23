@@ -20,8 +20,6 @@ import javax.websocket.Session;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.sse.EventSource;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.springframework.util.Assert;
 
 /**
@@ -41,8 +39,7 @@ public class WebSocketEventSourceListener extends AbstractEventSourceListener {
 
     @Override
     @SneakyThrows
-    public void onEvent(
-            @NotNull EventSource eventSource, @Nullable String id, @Nullable String type, @NotNull String data) {
+    public void onEvent(EventSource eventSource, String id, String type, String data) {
         super.onEvent(eventSource, id, type, data);
         session.getBasicRemote().sendText(data);
     }
