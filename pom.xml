@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.13</version>
+        <version>2.7.14</version>
         <relativePath/>
     </parent>
 
@@ -48,7 +48,7 @@
         <maven.javadoc.version>3.5.0</maven.javadoc.version>
         <flatten-maven-plugin>1.5.0</flatten-maven-plugin>
         <hutool.version>5.8.20</hutool.version>
-        <okhttp.version>4.10.0</okhttp.version>
+        <okhttp.version>4.11.0</okhttp.version>
         <jtokkit.version>0.6.1</jtokkit.version>
     </properties>
 
