@@ -354,6 +354,12 @@ public class OpenAiLoggingInterceptor implements Interceptor {
 
 参考 issue：https://gitee.com/lzhpo/chatgpt-spring-boot-starter/issues/I7KHQG
 
+## 鸣谢
+
+感谢Jetbrains提供的License！
+
+<img width="150" height="150" src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" alt="JetBrains Logo (Main) logo.">
+
 ## 微信公众号
 
 <img src="./does/images/WeChat-MP.png" width="453" height="150" alt="会打篮球的程序猿">
