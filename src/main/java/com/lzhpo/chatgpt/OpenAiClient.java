@@ -66,7 +66,9 @@ public interface OpenAiClient {
      *
      * @param request {@link CompletionRequest}
      * @return {@link CompletionResponse}
+     * @deprecated This is a legacy from OpenAi, please use {@link OpenAiClient#chatCompletions} method.
      */
+    @Deprecated
     CompletionResponse completions(@Valid CompletionRequest request);
 
     /**
@@ -74,7 +76,9 @@ public interface OpenAiClient {
      *
      * @param request {@link CompletionRequest}
      * @param listener {@link EventSourceListener}
+     * @deprecated This is a legacy from OpenAi, please use {@link OpenAiClient#streamChatCompletions} method.
      */
+    @Deprecated
     void streamCompletions(@Valid CompletionRequest request, @NotNull EventSourceListener listener);
 
     /**

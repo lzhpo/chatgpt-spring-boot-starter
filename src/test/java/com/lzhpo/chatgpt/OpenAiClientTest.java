@@ -23,14 +23,15 @@ import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Console;
+import cn.hutool.core.util.StrUtil;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.lzhpo.chatgpt.entity.audio.CreateAudioRequest;
 import com.lzhpo.chatgpt.entity.audio.CreateAudioResponse;
 import com.lzhpo.chatgpt.entity.billing.CreditGrantsResponse;
 import com.lzhpo.chatgpt.entity.billing.SubscriptionResponse;
 import com.lzhpo.chatgpt.entity.billing.UsageResponse;
-import com.lzhpo.chatgpt.entity.chat.ChatCompletionMessage;
-import com.lzhpo.chatgpt.entity.chat.ChatCompletionRequest;
-import com.lzhpo.chatgpt.entity.chat.ChatCompletionResponse;
+import com.lzhpo.chatgpt.entity.chat.*;
 import com.lzhpo.chatgpt.entity.completions.CompletionRequest;
 import com.lzhpo.chatgpt.entity.completions.CompletionResponse;
 import com.lzhpo.chatgpt.entity.edit.EditRequest;
@@ -48,12 +49,15 @@ import com.lzhpo.chatgpt.entity.model.RetrieveModelResponse;
 import com.lzhpo.chatgpt.entity.moderations.ModerationRequest;
 import com.lzhpo.chatgpt.entity.moderations.ModerationResponse;
 import com.lzhpo.chatgpt.entity.users.UserResponse;
+import com.lzhpo.chatgpt.exception.OpenAiException;
 import com.lzhpo.chatgpt.sse.CountDownLatchEventSourceListener;
 import com.lzhpo.chatgpt.utils.JsonUtils;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
@@ -412,5 +416,127 @@ class OpenAiClientTest {
 
         assertNotNull(response);
         Console.log(JsonUtils.toJsonPrettyString(response));
+    }
+
+    @Test
+    @Order(29)
+    void functions() {
+        ChatCompletionRequest request = createFunctionCallRequest();
+        ChatCompletionResponse response = openAiService.chatCompletions(request);
+        assertNotNull(response);
+        Console.log("OpenAi first response: {}", JsonUtils.toJsonPrettyString(response));
+
+        ChatCompletionRequest summarizeRequest = createFunctionCallSummarizeRequest(response);
+        ChatCompletionResponse summarizeResponse = openAiService.chatCompletions(summarizeRequest);
+        assertNotNull(summarizeResponse);
+        Console.log("OpenAi summarize response: {}", JsonUtils.toJsonPrettyString(summarizeResponse));
+    }
+
+    private ChatCompletionRequest createFunctionCallRequest() {
+        List<ChatCompletionMessage> messages = new ArrayList<>();
+        ChatCompletionMessage message = new ChatCompletionMessage();
+        message.setRole("user");
+        message.setContent("What is the weather like in Boston?");
+        messages.add(message);
+
+        ChatCompletionParameter parameter = new ChatCompletionParameter();
+        parameter.setType("object");
+        parameter.setProperties(FunctionCallWeather.builder()
+                .location(FunctionCallWeatherLocation.builder()
+                        .type("string")
+                        .description("The city and state, e.g. San Francisco, CA")
+                        .build())
+                .unit(FunctionCallWeatherUnit.builder()
+                        .type("string")
+                        .enums(ListUtil.of("celsius", "fahrenheit"))
+                        .build())
+                .build());
+        parameter.setRequired(ListUtil.of("location"));
+
+        List<ChatCompletionFunction> functions = new ArrayList<>();
+        ChatCompletionFunction function = new ChatCompletionFunction();
+        function.setName("get_current_weather");
+        function.setDescription("Get the current weather in a given location");
+        function.setParameters(parameter);
+        functions.add(function);
+
+        ChatCompletionRequest request = new ChatCompletionRequest();
+        request.setModel("gpt-3.5-turbo-0613");
+        request.setMessages(messages);
+        request.setFunctions(functions);
+        request.setFunctionCall("auto");
+        return request;
+    }
+
+    private ChatCompletionRequest createFunctionCallSummarizeRequest(ChatCompletionResponse response) {
+        List<ChatCompletionChoice> choices = response.getChoices();
+        assertNotNull(choices);
+
+        ChatCompletionFunctionCall functionCall = Optional.ofNullable(choices.get(0))
+                .map(ChatCompletionChoice::getMessage)
+                .map(ChatCompletionMessage::getFunctionCall)
+                .orElseThrow(() -> new OpenAiException("OpenAi not response function call."));
+        String arguments = functionCall.getArguments();
+        Console.log("OpenAi response function call arguments: {}", arguments);
+
+        List<ChatCompletionMessage> summarizeMessages = new ArrayList<>();
+
+        summarizeMessages.add(ChatCompletionMessage.builder()
+                .role("user")
+                .content("What is the weather like in Boston?")
+                .build());
+
+        summarizeMessages.add(ChatCompletionMessage.builder()
+                .role("assistant")
+                .content(StrUtil.EMPTY)
+                .functionCall(functionCall)
+                .build());
+
+        String dataSource = "{\"temperature\":\"22\",\"unit\":\"celsius\",\"description\":\"Sunny\"}";
+        summarizeMessages.add(ChatCompletionMessage.builder()
+                .role("function")
+                .name(functionCall.getName())
+                .content(dataSource)
+                .build());
+
+        ChatCompletionRequest summarizeRequest = new ChatCompletionRequest();
+        summarizeRequest.setModel("gpt-3.5-turbo-0613");
+        summarizeRequest.setMessages(summarizeMessages);
+        return summarizeRequest;
+    }
+
+    @Data
+    @SuperBuilder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private static class FunctionCallWeather {
+
+        private FunctionCallWeatherLocation location;
+        private FunctionCallWeatherUnit unit;
+    }
+
+    @Data
+    @SuperBuilder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private static class FunctionCallWeatherLocation {
+
+        private String type;
+        private String description;
+    }
+
+    @Data
+    @SuperBuilder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @JsonInclude(JsonInclude.Include.NON_NULL)
+    private static class FunctionCallWeatherUnit {
+
+        private String type;
+
+        @JsonProperty("enum")
+        private List<String> enums;
     }
 }

@@ -60,6 +60,24 @@ public class ChatCompletionRequest extends CommonConfig {
     private List<ChatCompletionMessage> messages;
 
     /**
+     * A list of functions the model may generate JSON inputs for.
+     * <a href="https://openai.com/blog/function-calling-and-other-api-updates">function-calling-and-other-api-updates</a>
+     */
+    private List<ChatCompletionFunction> functions;
+
+    /**
+     * Controls how the model responds to function calls. "none" means the model does not call a function,
+     * <p>and responds to the end-user. "auto" means the model can pick between an end-user or calling a function.
+     * <p>Specifying a particular function via {"name":\ "my_function"} forces the model to call that function.
+     * <ul>
+     *     <li> "none" is the default when no functions are present. </li>
+     *     <li> "auto" is the default if functions are present. </li>
+     * </ul>
+     */
+    @JsonProperty("function_call")
+    private Object functionCall;
+
+    /**
      * If set, partial message deltas will be sent, like in ChatGPT.
      * Tokens will be sent as data-only <a href="https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#Event_stream_format">server-sent events</a> as they become available, with the stream terminated by a {@code data: [DONE]} message.
      *
