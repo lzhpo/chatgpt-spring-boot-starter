@@ -47,7 +47,7 @@
         <maven.source.version>3.3.0</maven.source.version>
         <maven.javadoc.version>3.5.0</maven.javadoc.version>
         <flatten-maven-plugin>1.5.0</flatten-maven-plugin>
-        <hutool.version>5.8.20</hutool.version>
+        <hutool.version>5.8.21</hutool.version>
         <okhttp.version>4.11.0</okhttp.version>
         <jtokkit.version>0.6.1</jtokkit.version>
     </properties>
