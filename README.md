@@ -8,10 +8,11 @@
 1. 支持设置多个 API Key，并且支持对其设置权重以及是否启用，支持自动禁用失效的 API Key 以及自动轮转
 2. 支持设置请求代理
 3. 支持自定义请求 API（如果对 OpenAi 的 API 做了中转/代理）
-4. 支持OpenAi所有可以使用 API Key 访问的 API
+4. 支持 OpenAi 所有可以使用 API Key 访问的 API
 5. 支持流式响应，即所谓的"打字机"模式
 6. 请求参数自动校验
-7. 支持token计算
+7. 支持 token 计算
+8. 支持 function calling
 
 ## 支持的功能
 
@@ -188,7 +189,13 @@ OpenAi返回的token计算结果可在response返回体中获取：
 
 具体可参考测试用例`OpenAiCountTokensTest`以及`TokenUtils`
 
-### 6. 关于异常处理
+### 6. 支持 function calling
+
+关于 function calling 的介绍：https://platform.openai.com/docs/guides/gpt/function-calling
+
+参考示例见测试目录：`com.lzhpo.chatgpt.OpenAiClientTest#functions`
+
+### 7. 关于异常处理
 
 1. 常规、SSE以及WebSocket请求失败均会抛出`OpenAiException`异常，可自定义全局异常，取出OpenAi的响应结果转换为`OpenAiError`(如果转换结果`OpenAiError`不为空)，继而自行处理。
 2. 自定义流式处理的`EventSourceListener`，推荐继承`AbstractEventSourceListener`，如果没有特殊需求，直接重写`onEvent`方法即可，如果重写了`onFailure`方法，抛出何种异常取决于重写的`onFailure`方法。
