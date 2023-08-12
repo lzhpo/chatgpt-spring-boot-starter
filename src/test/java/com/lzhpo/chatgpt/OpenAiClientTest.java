@@ -434,10 +434,10 @@ class OpenAiClientTest {
 
     private ChatCompletionRequest createFunctionCallRequest() {
         List<ChatCompletionMessage> messages = new ArrayList<>();
-        ChatCompletionMessage message = new ChatCompletionMessage();
-        message.setRole("user");
-        message.setContent("What is the weather like in Boston?");
-        messages.add(message);
+        messages.add(ChatCompletionMessage.builder()
+                .role("user")
+                .content("What is the weather like in Boston?")
+                .build());
 
         ChatCompletionParameter parameter = new ChatCompletionParameter();
         parameter.setType("object");
@@ -454,24 +454,23 @@ class OpenAiClientTest {
         parameter.setRequired(ListUtil.of("location"));
 
         List<ChatCompletionFunction> functions = new ArrayList<>();
-        ChatCompletionFunction function = new ChatCompletionFunction();
-        function.setName("get_current_weather");
-        function.setDescription("Get the current weather in a given location");
-        function.setParameters(parameter);
-        functions.add(function);
+        functions.add(ChatCompletionFunction.builder()
+                .name("get_current_weather")
+                .description("Get the current weather in a given location")
+                .parameters(parameter)
+                .build());
 
-        ChatCompletionRequest request = new ChatCompletionRequest();
-        request.setModel("gpt-3.5-turbo-0613");
-        request.setMessages(messages);
-        request.setFunctions(functions);
-        request.setFunctionCall("auto");
-        return request;
+        return ChatCompletionRequest.builder()
+                .model("gpt-3.5-turbo-0613")
+                .messages(messages)
+                .functions(functions)
+                .functionCall("auto")
+                .build();
     }
 
     private ChatCompletionRequest createFunctionCallSummarizeRequest(ChatCompletionResponse response) {
         List<ChatCompletionChoice> choices = response.getChoices();
         assertNotNull(choices);
-
         ChatCompletionFunctionCall functionCall = Optional.ofNullable(choices.get(0))
                 .map(ChatCompletionChoice::getMessage)
                 .map(ChatCompletionMessage::getFunctionCall)
@@ -480,18 +479,15 @@ class OpenAiClientTest {
         Console.log("OpenAi response function call arguments: {}", arguments);
 
         List<ChatCompletionMessage> summarizeMessages = new ArrayList<>();
-
         summarizeMessages.add(ChatCompletionMessage.builder()
                 .role("user")
                 .content("What is the weather like in Boston?")
                 .build());
-
         summarizeMessages.add(ChatCompletionMessage.builder()
                 .role("assistant")
                 .content(StrUtil.EMPTY)
                 .functionCall(functionCall)
                 .build());
-
         String dataSource = "{\"temperature\":\"22\",\"unit\":\"celsius\",\"description\":\"Sunny\"}";
         summarizeMessages.add(ChatCompletionMessage.builder()
                 .role("function")
@@ -499,10 +495,10 @@ class OpenAiClientTest {
                 .content(dataSource)
                 .build());
 
-        ChatCompletionRequest summarizeRequest = new ChatCompletionRequest();
-        summarizeRequest.setModel("gpt-3.5-turbo-0613");
-        summarizeRequest.setMessages(summarizeMessages);
-        return summarizeRequest;
+        return ChatCompletionRequest.builder()
+                .model("gpt-3.5-turbo-0613")
+                .messages(summarizeMessages)
+                .build();
     }
 
     @Data
