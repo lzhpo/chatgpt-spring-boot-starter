@@ -424,12 +424,12 @@ class OpenAiClientTest {
         ChatCompletionRequest request = createFunctionCallRequest();
         ChatCompletionResponse response = openAiService.chatCompletions(request);
         assertNotNull(response);
-        Console.log("OpenAi first response: {}", JsonUtils.toJsonPrettyString(response));
+        Console.log("===> OpenAi first response: {}", JsonUtils.toJsonPrettyString(response));
 
         ChatCompletionRequest summarizeRequest = createFunctionCallSummarizeRequest(response);
         ChatCompletionResponse summarizeResponse = openAiService.chatCompletions(summarizeRequest);
         assertNotNull(summarizeResponse);
-        Console.log("OpenAi summarize response: {}", JsonUtils.toJsonPrettyString(summarizeResponse));
+        Console.log("===> OpenAi summarize response: {}", JsonUtils.toJsonPrettyString(summarizeResponse));
     }
 
     private ChatCompletionRequest createFunctionCallRequest() {
@@ -476,7 +476,7 @@ class OpenAiClientTest {
                 .map(ChatCompletionMessage::getFunctionCall)
                 .orElseThrow(() -> new OpenAiException("OpenAi not response function call."));
         String arguments = functionCall.getArguments();
-        Console.log("OpenAi response function call arguments: {}", arguments);
+        Console.log("===> OpenAi response function call arguments: {}", arguments);
 
         List<ChatCompletionMessage> summarizeMessages = new ArrayList<>();
         summarizeMessages.add(ChatCompletionMessage.builder()
