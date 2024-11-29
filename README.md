@@ -233,7 +233,7 @@ SSE和WebSocket都是用于实现服务器和浏览器之间实时通信的技�
 WebSocket是全双工通信协议，适用于双向通信的实时场景，而SSE是单向通信协议，适用于服务器向客户端推送消息的实时场景。
 
 简单网页效果示例（“打字机”效果）：
-![](./does/images/SSE-Stream-Chat.png)
+![](./docs/images/SSE-Stream-Chat.png)
 
 后端代码简单示例：
 ```java
@@ -369,4 +369,4 @@ public class OpenAiLoggingInterceptor implements Interceptor {
 
 ## 微信公众号
 
-<img src="./does/images/WeChat-MP.png" width="453" height="150" alt="会打篮球的程序猿">
+<img src="./docs/images/WeChat-MP.png" width="453" height="150" alt="会打篮球的程序猿">
